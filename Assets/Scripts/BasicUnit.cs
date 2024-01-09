@@ -141,7 +141,7 @@ public class BasicUnit : Unit
 			GameObject go = new GameObject();
 			go.transform.position = new Vector3(u.x, 0, u.y);
 			go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-			go.AddComponent<MeshFilter>().sharedMesh = Orderer.smesh;
+			go.AddComponent<MeshFilter>().sharedMesh = Player.smesh;
 			go.AddComponent<MeshRenderer>();
 		}
 	}

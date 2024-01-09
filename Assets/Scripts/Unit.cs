@@ -5,10 +5,12 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour
 {
-	float minRange;
-	float maxRange;
-	float damage;
+	[SerializeField] float minRange;
+	[SerializeField] float maxRange;
+	[SerializeField] float damage;
 	IDamageable target;
+
+	[SerializeField] Team team;
 
 	public float MinRange
 	{
@@ -77,6 +79,8 @@ public abstract class Unit : MonoBehaviour
 		private set;
 	}
 
+	public Team Team { get => this.team; private set => this.team = value; }
+
 	protected virtual void Start()
 	{
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
@@ -85,6 +89,7 @@ public abstract class Unit : MonoBehaviour
 	}
 
 	public abstract void MoveTo(Vector2 pos, bool isCheckpoint = false);
+	public abstract void Attack(Unit u);
 
 	protected virtual void FixedUpdate()
 	{
@@ -238,3 +243,4 @@ public abstract class Unit : MonoBehaviour
 		return true;
 	}
 }
+

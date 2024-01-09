@@ -212,6 +212,93 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 52830820}
   m_Mesh: {fileID: -137526657565633576, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+--- !u!1 &137783354
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 137783355}
+  - component: {fileID: 137783357}
+  - component: {fileID: 137783356}
+  m_Layer: 0
+  m_Name: EBasicUnit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &137783355
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137783354}
+  m_LocalRotation: {x: 0.49991274, y: -0.50008726, z: 0.49991274, w: 0.50008726}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2092101903}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 89.98, y: -90, z: 0}
+--- !u!23 &137783356
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137783354}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 65b08ef3c10f2ee48a8757f9e5e434d5, type: 2}
+  - {fileID: 4835078630258379571, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: 4217796364934669478, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: 3328855280418784920, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: 7038688542854162588, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &137783357
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137783354}
+  m_Mesh: {fileID: 2338723023381891699, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
 --- !u!1 &150686946
 GameObject:
   m_ObjectHideFlags: 0
@@ -505,6 +592,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &496612232
 NavMeshAgent:
@@ -864,6 +955,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &758761515
 NavMeshAgent:
@@ -1230,6 +1325,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &886135879
 NavMeshAgent:
@@ -1644,6 +1743,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &1365829882
 NavMeshAgent:
@@ -1818,6 +1921,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d41df445954e464e864aa376ce6a8e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 0
   navAgent: {fileID: 1484532218}
 --- !u!4 &1484532220
@@ -1881,6 +1988,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &1487852518
 NavMeshAgent:
@@ -2054,6 +2165,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &1618641947
 NavMeshAgent:
@@ -2221,6 +2336,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   selectionCirclePrefab: {fileID: 7748972891417431614, guid: 12c39b0f3d2b78f46a274af9aaab3893, type: 3}
+  team: 0
   testMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1744340909
 Transform:
@@ -2283,6 +2399,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!195 &1761888745
 NavMeshAgent:
@@ -2488,6 +2608,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
   speed: 5
 --- !u!136 &1846270274
 CapsuleCollider:
@@ -2737,6 +2861,94 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2062039007}
   m_CullTransparentMesh: 1
+--- !u!1 &2092101899
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2092101903}
+  - component: {fileID: 2092101902}
+  - component: {fileID: 2092101901}
+  - component: {fileID: 2092101900}
+  m_Layer: 6
+  m_Name: Unit (9)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!136 &2092101900
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092101899}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.36440104
+  m_Height: 1.9785123
+  m_Direction: 1
+  m_Center: {x: -0.024654448, y: 0.99467087, z: 0}
+--- !u!114 &2092101901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092101899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26f02262a9163e34399e593640d476b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minRange: 0
+  maxRange: 0
+  damage: 0
+  team: 0
+  speed: 5
+--- !u!195 &2092101902
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092101899}
+  m_Enabled: 0
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!4 &2092101903
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092101899}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9.44, y: 0, z: -2.55}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 137783355}
+  m_Father: {fileID: 0}
+  m_RootOrder: 17
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2134718886
 GameObject:
   m_ObjectHideFlags: 0

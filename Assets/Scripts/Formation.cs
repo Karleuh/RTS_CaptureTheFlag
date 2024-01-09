@@ -157,7 +157,7 @@ public class Formation : MonoBehaviour
 	}
 
 
-	private void Attack(Unit u)
+	public void Attack(Unit u)
 	{
 
 	}

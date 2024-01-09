@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Orderer : MonoBehaviour
+public class Player : MonoBehaviour
 {
 	[Header("Camera")]
 	[SerializeField]
@@ -24,6 +24,10 @@ public class Orderer : MonoBehaviour
 	LayerMask selectableLayer;
 	[SerializeField]
 	GameObject selectionCirclePrefab;
+
+	[Header("Gameplay")]
+	[SerializeField] 
+	Team team;
 
 	bool isMassSelecting;
 	Vector2 startMousePos;
@@ -65,7 +69,17 @@ public class Orderer : MonoBehaviour
 		if(Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits != null)
 		{
 			Vector2Int p = Vector2Int.FloorToInt(this.GetPosFromScreenPoint(Input.mousePosition));
-			Debug.Log("Clicked on : " + p + ",    closest : " + Terrain.instance.GetClosestAccessiblePos(p));
+
+			Unit targetUnit = null;
+			//find if we attack a unit
+			Ray r = this.cam.ScreenPointToRay(this.startMousePos);
+			if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
+			{
+				Unit unit = info.collider.GetComponentInParent<Unit>();
+				if(unit != null && unit.Team != this.team)
+					targetUnit = unit;
+
+			}
 
 			if (this.selectedUnits.Count > 1)
 			{
@@ -73,13 +87,14 @@ public class Orderer : MonoBehaviour
 				form.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
 				form.gameObject.AddComponent<MeshRenderer>();
 				form.OnCreation(this.selectedUnits);
-				form.MoveTo(this.GetPosFromScreenPoint(Input.mousePosition));
+				form.Attack(targetUnit);
 			}
 			else if (this.selectedUnits.Count == 1)
 			{
 				HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
 				enumerator.MoveNext();
 				enumerator.Current.MoveTo(this.GetPosFromScreenPoint(Input.mousePosition));
+				enumerator.Current.Attack(targetUnit);
 			}
 		}
 
@@ -190,7 +205,7 @@ public class Orderer : MonoBehaviour
 						{
 							foreach (var unit in units)
 							{
-								if (unit.Position.x > minX && unit.Position.x < maxX && unit.Position.y > minY && unit.Position.y < maxY)
+								if (unit.Team == this.team && unit.Position.x > minX && unit.Position.x < maxX && unit.Position.y > minY && unit.Position.y < maxY)
 								{
 									this.selectedUnits.Add(unit);
 									GameObject circle = null;
@@ -224,22 +239,24 @@ public class Orderer : MonoBehaviour
 				if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
 				{
 					Unit unit = info.collider.GetComponentInParent<Unit>();
-					this.selectedUnits.Add(unit);
+					if (unit != null && unit.Team == this.team)
+					{
+						this.selectedUnits.Add(unit);
 
-					GameObject circle = null;
-					if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
-					{
-						circle = this.selectionCircles[this.selectedUnits.Count - 1];
-						circle.transform.SetParent(unit.transform);
-						circle.transform.localPosition = new Vector3(0, 0.2f, 0);
-						circle.SetActive(true);
+						GameObject circle = null;
+						if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
+						{
+							circle = this.selectionCircles[this.selectedUnits.Count - 1];
+							circle.transform.SetParent(unit.transform);
+							circle.transform.localPosition = new Vector3(0, 0.2f, 0);
+							circle.SetActive(true);
+						}
+						else
+						{
+							circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
+							this.selectionCircles.Add(circle);
+						}
 					}
-					else
-					{
-						circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
-						this.selectionCircles.Add(circle);
-					}
-					
 				}
 
 			}
