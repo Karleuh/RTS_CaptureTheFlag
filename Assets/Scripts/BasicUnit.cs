@@ -25,27 +25,32 @@ public class BasicUnit : Unit
 		}
 		else
 		{
-			if (Time.time + 2 > this.timeSinceFormationSpotInObstacle)
+			if ((this.target - this.Position).sqrMagnitude > 2)
 			{
-				this.checkpoints.Clear();
-				Unit.A_Star(prevTarget, this.target, this.checkpoints);
-			}
-			else if ((this.target - this.Position).sqrMagnitude > 2)
-			{
-				//List<Vector2Int> temp = new List<Vector2Int>();
-				//Unit.A_Star(prevTarget, pos, temp);
-				//this.checkpoints.InsertRange(0, temp);
-				SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
-				Unit.A_Star(prevTarget, this.target, temp);
-				this.checkpoints.ConcatBefore(temp);
 
 
-				if (isTargetInObstacle && this.Formation != null && Time.time + 2 > this.timeSinceFormationSpotInObstacle)
+				if (isTargetInObstacle && this.Formation != null)
 				{
-					this.timeSinceFormationSpotInObstacle = Time.time;
+					if (Time.time + 2 > this.timeSinceFormationSpotInObstacle)
+					{
+						this.checkpoints.Clear();
+						Unit.A_Star(this.Position, this.target, this.checkpoints);
+						this.timeSinceFormationSpotInObstacle = Time.time;
+					}
+					else
+					{
+						SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
+						Unit.A_Star(prevTarget, this.target, temp);
+						this.checkpoints.ConcatBefore(temp);
+					}
+				}
+				else
+				{
+					SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
+					Unit.A_Star(prevTarget, this.target, temp);
+					this.checkpoints.ConcatBefore(temp);
 				}
 			}
-
 
 		}
 
