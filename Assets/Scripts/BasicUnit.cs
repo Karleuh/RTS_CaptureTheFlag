@@ -68,6 +68,10 @@ public class BasicUnit : Unit
 
 	}
 
+	public override void Attack(Unit u)
+	{
+		Debug.Log("Attaque ! ");
+	}
 
 	protected override void Start()
     {

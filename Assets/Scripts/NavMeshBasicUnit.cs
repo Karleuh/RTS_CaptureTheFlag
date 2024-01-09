@@ -18,6 +18,11 @@ public class NavMeshBasicUnit : Unit
 
 	}
 
+	public override void Attack(Unit u)
+	{
+		throw new System.NotImplementedException();
+	}
+
 	protected override void Start()
     {
 		base.Start();
