@@ -5,6 +5,30 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour
 {
+	float minRange;
+	float maxRange;
+	float damage;
+	IDamageable target;
+
+	public float MinRange
+	{
+		get { return this.minRange; }
+
+	}
+
+	public float MaxRange
+	{
+		get { return this.maxRange; }
+
+	}
+
+	public float Damage
+	{
+		get { return this.damage; }
+	}
+
+
+
 	[SerializeField]
 	[Range(0.1f, 10)]
 	private float speed;

@@ -31,7 +31,7 @@ public class BasicUnit : Unit
 
 				if (isTargetInObstacle && this.Formation != null)
 				{
-					if (Time.time + 2 > this.timeSinceFormationSpotInObstacle)
+					if (Time.time > this.timeSinceFormationSpotInObstacle + 1)
 					{
 						this.checkpoints.Clear();
 						Unit.A_Star(this.Position, this.target, this.checkpoints);
@@ -46,11 +46,22 @@ public class BasicUnit : Unit
 				}
 				else
 				{
-					SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
-					Unit.A_Star(prevTarget, this.target, temp);
-					this.checkpoints.ConcatBefore(temp);
+					if (this.timeSinceFormationSpotInObstacle != 0)
+					{
+						this.checkpoints.Clear();
+						Unit.A_Star(this.Position, this.target, this.checkpoints);
+						this.timeSinceFormationSpotInObstacle = 0;
+					}
+					else
+					{
+						SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
+						Unit.A_Star(prevTarget, this.target, temp);
+						this.checkpoints.ConcatBefore(temp);
+					}
 				}
 			}
+			else
+				this.checkpoints.Clear();
 
 		}
 
@@ -65,11 +76,13 @@ public class BasicUnit : Unit
 
     protected override void FixedUpdate()
     {
-		//if ((this.checkpoints.Count > 0 && Terrain.instance.IsObstacle(this.checkpoints.Last.Value)) || Terrain.instance.IsObstacle((int)this.target.x, (int)this.target.y))
-		//{
-		//	this.checkpoints.Clear();
-		//	this.IsMoving = false;
-		//}
+
+		if (this.timeSinceFormationSpotInObstacle != 0 && Time.time > this.timeSinceFormationSpotInObstacle + 2)
+		{
+			this.checkpoints.Clear();
+			Unit.A_Star(this.Position, this.target, this.checkpoints);
+			this.timeSinceFormationSpotInObstacle = 0;
+		}
 
 		if (this.IsMoving)
 		{
