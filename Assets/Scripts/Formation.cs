@@ -143,7 +143,7 @@ public class Formation : MonoBehaviour
 	{
 		for(int i=0; i<this.units.Count; i++)
 		{
-			Vector2 left = Vector2.Perpendicular(this.forward);
+			Vector2 left = Vector2.Perpendicular(this.forward).normalized;
 			// balance on multiple ticks
 			Vector2 u = this.position + left * (i - this.units.Count / 2);
 			Vector2Int flu = Vector2Int.FloorToInt(u);
@@ -159,6 +159,19 @@ public class Formation : MonoBehaviour
 
 	public void Attack(Unit u)
 	{
+		this.target = Vector2Int.FloorToInt(pos) == Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) ? pos : Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) + new Vector2(0.5f, 0.5f);
+		this.checkpoints.Clear();
+		this.position = new Vector2(this.transform.position.x, this.transform.position.z);
+		Unit.A_Star(this.position, this.target, this.checkpoints);
 
+		if (this.checkpoints.Count >= 2)
+			this.forward = ((Vector2)(this.checkpoints[this.checkpoints.Count - 2] - this.checkpoints[this.checkpoints.Count - 1])).normalized;
+		else
+			this.forward = (this.target - this.position).normalized;
+		if (this.forward.sqrMagnitude == 0)
+			this.forward = Vector2.up;
+
+		this.UpdateUnits(true);
+		this.waitForPosition = true;
 	}
 }

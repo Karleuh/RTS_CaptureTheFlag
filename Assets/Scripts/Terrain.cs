@@ -301,6 +301,8 @@ public class Terrain : MonoBehaviour
 
 		}
 
+		this.closestAccessible[this.width / 2 + (this.height / 2) * this.width] = Vector2Int.zero; //set center
+
 
 		for (int x = 0; x < width; x++)
 		{

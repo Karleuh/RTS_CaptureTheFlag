@@ -103,6 +103,7 @@ public abstract class Unit : MonoBehaviour
 
 	public static void A_Star(Vector2 start, Vector2 goal, ICollection<Vector2Int> result)
 	{
+
 		// The set of discovered nodes that may need to be (re-)expanded.
 		// Initially, only the start node is known.
 		// This is usually implemented as a min-heap or priority queue rather than a hash-set.
@@ -124,8 +125,11 @@ public abstract class Unit : MonoBehaviour
 		bool foundSmallerFScore = false;
 		Vector2Int smallerFScore = default;
 
+		int chibre = 0;
+
 		while (openSet.Count > 0)
 		{
+			chibre += 1;
 			// This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
 			Vector2Int current = Vector2Int.zero;
 			float minFScore = float.MaxValue;
@@ -148,11 +152,16 @@ public abstract class Unit : MonoBehaviour
 				minFScore = fScore[current];
 			}
 
+			if(chibre > 10000)
+			{
+				Debug.Log("BUG : " + current + "  " + goal);
+				Debug.Log("BUG : " + current + "  " + goal);
+				return;
+			}
 			//return
 			if (current == Vector2Int.FloorToInt(goal))
 			{
 				//List<Vector2Int> result = new List<Vector2Int>();
-
 				SmoothAndAssemblePath(cameFrom, current, result);
 				return;
 

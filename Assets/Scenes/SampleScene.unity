@@ -2909,7 +2909,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 0
   damage: 0
-  team: 0
+  team: 1
   speed: 5
 --- !u!195 &2092101902
 NavMeshAgent:

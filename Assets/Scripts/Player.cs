@@ -72,13 +72,12 @@ public class Player : MonoBehaviour
 
 			Unit targetUnit = null;
 			//find if we attack a unit
-			Ray r = this.cam.ScreenPointToRay(this.startMousePos);
+			Ray r = this.cam.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
 			{
 				Unit unit = info.collider.GetComponentInParent<Unit>();
 				if(unit != null && unit.Team != this.team)
 					targetUnit = unit;
-
 			}
 
 			if (this.selectedUnits.Count > 1)
@@ -87,14 +86,20 @@ public class Player : MonoBehaviour
 				form.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
 				form.gameObject.AddComponent<MeshRenderer>();
 				form.OnCreation(this.selectedUnits);
-				form.Attack(targetUnit);
+				if (targetUnit != null)
+					form.Attack(targetUnit);
+				else
+					form.MoveTo(p);
 			}
 			else if (this.selectedUnits.Count == 1)
 			{
 				HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
 				enumerator.MoveNext();
 				enumerator.Current.MoveTo(this.GetPosFromScreenPoint(Input.mousePosition));
-				enumerator.Current.Attack(targetUnit);
+				if (targetUnit != null)
+					enumerator.Current.Attack(targetUnit);
+				else
+					enumerator.Current.MoveTo(p);
 			}
 		}
 
