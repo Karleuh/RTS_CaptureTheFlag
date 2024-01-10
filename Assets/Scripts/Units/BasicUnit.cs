@@ -21,7 +21,7 @@ public class BasicUnit : Unit
 			this.checkpoints.Clear();
 
 			if ((this.target - this.Position).sqrMagnitude > 2)
-				Unit.A_Star(this.Position, this.target, this.checkpoints);
+				AStar.A_Star(this.Position, this.target, this.checkpoints);
 		}
 		else
 		{
@@ -34,13 +34,13 @@ public class BasicUnit : Unit
 					if (Time.time > this.timeSinceFormationSpotInObstacle + 1)
 					{
 						this.checkpoints.Clear();
-						Unit.A_Star(this.Position, this.target, this.checkpoints);
+						AStar.A_Star(this.Position, this.target, this.checkpoints);
 						this.timeSinceFormationSpotInObstacle = Time.time;
 					}
 					else
 					{
 						SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
-						Unit.A_Star(prevTarget, this.target, temp);
+						AStar.A_Star(prevTarget, this.target, temp);
 						this.checkpoints.ConcatBefore(temp);
 					}
 				}
@@ -49,13 +49,13 @@ public class BasicUnit : Unit
 					if (this.timeSinceFormationSpotInObstacle != 0)
 					{
 						this.checkpoints.Clear();
-						Unit.A_Star(this.Position, this.target, this.checkpoints);
+						AStar.A_Star(this.Position, this.target, this.checkpoints);
 						this.timeSinceFormationSpotInObstacle = 0;
 					}
 					else
 					{
 						SimpleConcatLinkedList<Vector2Int> temp = new SimpleConcatLinkedList<Vector2Int>();
-						Unit.A_Star(prevTarget, this.target, temp);
+						AStar.A_Star(prevTarget, this.target, temp);
 						this.checkpoints.ConcatBefore(temp);
 					}
 				}
@@ -84,7 +84,7 @@ public class BasicUnit : Unit
 		if (this.timeSinceFormationSpotInObstacle != 0 && Time.time > this.timeSinceFormationSpotInObstacle + 2)
 		{
 			this.checkpoints.Clear();
-			Unit.A_Star(this.Position, this.target, this.checkpoints);
+			AStar.A_Star(this.Position, this.target, this.checkpoints);
 			this.timeSinceFormationSpotInObstacle = 0;
 		}
 
