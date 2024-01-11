@@ -14,12 +14,18 @@ public class FieldOfView : MonoBehaviour
     [SerializeField] private float viewRadius;
     [SerializeField] private float viewAngle;
 
-    [SerializeField] private LayerMask targetMask;
+    [SerializeField] private LayerMask realTargetMask;
+    [SerializeField] private LayerMask virtualTargetMask;
     [SerializeField] private LayerMask obstacleMask;
 
     //Liste des Targets visibles !
     public List<Transform> visibleTargets = new List<Transform>();
 
+    //Liste des Targets virtuelles (pour la patrouille)
+    public List<Transform> virtualTargets = new List<Transform>();
+    
+    public Transform mainTarget;
+    public Transform virtualTarget;
     //Visuel
     private Mesh mesh;
     private Vector3[] vertices;
@@ -28,6 +34,8 @@ public class FieldOfView : MonoBehaviour
 
     void Start()
     {
+
+        //Find Target commence ici et ne s'arrete jamais 
         StartCoroutine("FindTargetsWithDelay", FOVRefreshDelay);
 
 
@@ -56,12 +64,25 @@ public class FieldOfView : MonoBehaviour
 
     void Update()
     {
-        //pas besoin d'update visuel (ça a l'air louche pcq le mesh est crée localement depuis le gameobject auquel ce script est attaché et bouge tout seul)
+        //pas besoin d'update visuel (ï¿½a a l'air louche pcq le mesh est crï¿½e localement depuis le gameobject auquel ce script est attachï¿½ et bouge tout seul)
         //vertices[0] = new Vector3(0,0,0);
         //vertices[1] = DirFromAngle(viewAngle / 2) * viewRadius;
         //vertices[2] = DirFromAngle(-viewAngle / 2) * viewRadius;
 
         //mesh.vertices = vertices;
+
+        //Find virtual target commence quand il n'y a pas de main target, et s'arrete dÃ¨s qu'une main target est trouvÃ©e
+        if (visibleTargets.Count > 0)
+        {
+            mainTarget = FindCurrentTarget(visibleTargets);
+            StopCoroutine("FindVirtualTargetWithDelay");
+        }
+        else
+        {
+            mainTarget = null;
+            virtualTarget = FindCurrentTarget(virtualTargets);
+            StartCoroutine("FindVirtualTargetWithDelay", FOVRefreshDelay);
+        }
 
     }
 
@@ -71,13 +92,25 @@ public class FieldOfView : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(delay);
-            FindVisibleTargets();
+            FindVisibleTargets(visibleTargets, realTargetMask);
         }
     }
 
-    void FindVisibleTargets()
+    IEnumerator FindVirtualTargetWithDelay(float delay)
     {
-        visibleTargets.Clear();
+        while(true)
+        {
+            yield return new WaitForSeconds(delay);
+            FindVisibleTargets(virtualTargets, virtualTargetMask);
+        }
+    }
+
+
+
+
+    void FindVisibleTargets(List<Transform> _visibleTargets, LayerMask targetMask)
+    {
+        _visibleTargets.Clear();
         //Liste des targets dans le cercle de vision maximal
         Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
 
@@ -89,16 +122,28 @@ public class FieldOfView : MonoBehaviour
             //Targets dans le cone de vision
             if (Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2)
             {
-                //RayCast pour s'assurer que la target n'est pas derrière un obstacle
+                //RayCast pour s'assurer que la target n'est pas derriï¿½re un obstacle
                 float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
                 if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstacleMask))
                 {
-                    visibleTargets.Add(target);
+                    _visibleTargets.Add(target);
                 }
 
             }
 
+        }
+    }
+
+    Transform FindCurrentTarget(List<Transform> _visibleTargets)
+    {
+        if (_visibleTargets.Count > 0)
+        {
+            return _visibleTargets[0];
+        }
+        else
+        {
+            return null;
         }
     }
     private Vector3 DirFromAngle(float angle)
