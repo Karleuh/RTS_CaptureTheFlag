@@ -3,31 +3,18 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour
+public abstract class Unit : MonoBehaviour, IDamageable
 {
+
+	private const int RECALCULATE_PATH_COOLDOWN = 1;
+
+	[Header("Attack")]
 	[SerializeField] float minRange;
 	[SerializeField] float maxRange;
 	[SerializeField] float damage;
+	[SerializeField] float attackCooldown;
 	IDamageable target;
 
-	[SerializeField] Team team;
-
-	public float MinRange
-	{
-		get { return this.minRange; }
-
-	}
-
-	public float MaxRange
-	{
-		get { return this.maxRange; }
-
-	}
-
-	public float Damage
-	{
-		get { return this.damage; }
-	}
 
 
 
@@ -35,7 +22,38 @@ public abstract class Unit : MonoBehaviour
 	[Range(0.1f, 10)]
 	private float speed;
 
+	[SerializeField] Team team;
+
 	private Formation _formation;
+
+	private Vector2 position;
+	private Vector3 size;
+	private UnitState unitState;
+
+	float lastTimePathCalculated;
+
+	public float MinRange
+	{
+		get => this.minRange;
+
+	}
+
+	public float MaxRange
+	{
+		get => this.maxRange;
+
+	}
+
+	public float Damage
+	{
+		get => this.damage;
+	}
+
+	public float AttackCooldown
+	{
+		get => this.attackCooldown;
+	}
+
 
 	public Formation Formation
 	{
@@ -64,8 +82,6 @@ public abstract class Unit : MonoBehaviour
 
 	public bool IsMoving { get; protected set; }
 
-	private Vector2 position;
-	private Vector3 size;
 
 	public virtual Vector2 Position
 	{
@@ -81,6 +97,7 @@ public abstract class Unit : MonoBehaviour
 
 	public Team Team { get => this.team; private set => this.team = value; }
 
+
 	protected virtual void Start()
 	{
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
@@ -89,7 +106,19 @@ public abstract class Unit : MonoBehaviour
 	}
 
 	public abstract void MoveTo(Vector2 pos, bool isCheckpoint = false);
-	public abstract void Attack(Unit u);
+	public abstract void StopMovement();
+
+
+
+	public void Attack(Unit u)
+	{
+		this.target = u;
+		this.unitState = UnitState.ATTACK;
+		this.MoveTo(u.Position);
+		this.lastTimePathCalculated = Time.time;
+	}
+
+
 
 	protected virtual void FixedUpdate()
 	{
@@ -99,6 +128,38 @@ public abstract class Unit : MonoBehaviour
 		{
 			UnitManager.OnUnitMove(this, oldcp);
 		}
+
+		if(this.unitState == UnitState.ATTACK)
+			HandleAttack();
 	}
+
+	private void HandleAttack()
+	{
+		if(Utils.SqrDistance(this.Position, target.Position) > this.MaxRange * this.MaxRange)
+		{
+			if(this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
+			{
+				this.MoveTo(this.target.Position);
+				this.lastTimePathCalculated = Time.time;
+			}
+		}
+		else if(Utils.SqrDistance(this.Position, target.Position) < this.MinRange * this.MinRange)
+		{
+			if (this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
+			{
+				Vector2 dir = (this.Position - this.target.Position).normalized;
+				this.MoveTo(this.target.Position + dir * this.MaxRange);
+				this.lastTimePathCalculated = Time.time;
+			}
+		}
+		else if(this.IsMoving)
+		{
+			this.StopMovement();
+		}
+	}
+
+	public abstract void Hit(float damagePoints);
+	public abstract void Heal(float healingPoints);
 }
+
 

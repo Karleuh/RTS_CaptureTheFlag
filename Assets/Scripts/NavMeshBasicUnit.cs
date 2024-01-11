@@ -18,10 +18,6 @@ public class NavMeshBasicUnit : Unit
 
 	}
 
-	public override void Attack(Unit u)
-	{
-		throw new System.NotImplementedException();
-	}
 
 	protected override void Start()
     {
@@ -37,5 +33,20 @@ public class NavMeshBasicUnit : Unit
 	{
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
 		base.FixedUpdate();
+	}
+
+	public override void StopMovement()
+	{
+		throw new System.NotImplementedException();
+	}
+
+	public override void Hit(float damagePoints)
+	{
+		throw new System.NotImplementedException();
+	}
+
+	public override void Heal(float healingPoints)
+	{
+		throw new System.NotImplementedException();
 	}
 }

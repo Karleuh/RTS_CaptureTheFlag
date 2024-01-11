@@ -1,5 +1,5 @@
 public enum UnitState
 {
+	MOVE,
 	ATTACK,
-	MOVE
 }

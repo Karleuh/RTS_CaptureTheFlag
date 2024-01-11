@@ -1,9 +1,26 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public static class AStar
 {
+	private class AStarNode : IComparable<AStarNode>
+	{
+		public Vector2Int Node { get; set; }
+		public Vector2Int CameFrom { get; set; }
+		public float GScore { get; set; }
+		public float FScore { get; set; }
+
+		public int CompareTo(AStarNode other)
+		{
+			return this.FScore.CompareTo(other);
+		}
+	}
+
+
+
+
 	public static void A_Star(Vector2 start, Vector2 goal, ICollection<Vector2Int> result)
 	{
 
@@ -14,6 +31,7 @@ public static class AStar
 
 		// For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from the start
 		// to n currently known.
+
 		Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
 
 		// For node n, gScore[n] is the cost of the cheapest path from start to n currently known.

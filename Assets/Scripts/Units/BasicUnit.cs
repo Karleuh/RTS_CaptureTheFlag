@@ -68,10 +68,6 @@ public class BasicUnit : Unit
 
 	}
 
-	public override void Attack(Unit u)
-	{
-		Debug.Log("Attaque ! ");
-	}
 
 	protected override void Start()
     {
@@ -81,6 +77,13 @@ public class BasicUnit : Unit
     protected override void FixedUpdate()
     {
 
+		HandleMovement();
+
+		base.FixedUpdate();
+    }
+
+	private void HandleMovement()
+	{
 		if (this.timeSinceFormationSpotInObstacle != 0 && Time.time > this.timeSinceFormationSpotInObstacle + 2)
 		{
 			this.checkpoints.Clear();
@@ -95,32 +98,32 @@ public class BasicUnit : Unit
 
 
 
-			
+
 			if (this.checkpoints.Count > 1)
 			{
 				//Vector2Int d = this.checkpoints[this.checkpoints.Count - 1];
 				//Vector2Int dd = this.checkpoints[this.checkpoints.Count - 2];
 				Vector2Int d = this.checkpoints.Last.Value;
 				Vector2Int dd = this.checkpoints.Last.Prev.Value;
-				tempTarget = new Vector3((d.x + 0.5f + dd.x)/2, 0, (d.y + 0.5f + dd.y)/2);
+				tempTarget = new Vector3((d.x + 0.5f + dd.x) / 2, 0, (d.y + 0.5f + dd.y) / 2);
 			}
 			else if (!isLastCheckpoint)
 			{
 				//Vector2Int d = this.checkpoints[this.checkpoints.Count - 1];
 				Vector2Int d = this.checkpoints.Last.Value;
-				tempTarget = new Vector3((d.x + 0.5f + this.target.x)/2, 0, (d.y + 0.5f + this.target.y)/2);
+				tempTarget = new Vector3((d.x + 0.5f + this.target.x) / 2, 0, (d.y + 0.5f + this.target.y) / 2);
 			}
 			else
 				tempTarget = new Vector3(this.target.x, 0, this.target.y);
 
 			bool isLateInFormationOrNotInFormation = this.Formation == null || (this.target - this.Position).sqrMagnitude > .75f;
-			float currentSpeed =  isLateInFormationOrNotInFormation ? this.Speed : this.Formation.Speed;
+			float currentSpeed = isLateInFormationOrNotInFormation ? this.Speed : this.Formation.Speed;
 
 			Vector3 forward = (tempTarget - this.transform.position).normalized;
 
 			this.transform.position += forward * currentSpeed * Time.fixedDeltaTime;
 
-			if(forward.sqrMagnitude == 1)
+			if (forward.sqrMagnitude == 1)
 				this.transform.forward = forward;
 
 			if ((this.transform.position - tempTarget).sqrMagnitude < 0.25f)
@@ -133,10 +136,16 @@ public class BasicUnit : Unit
 			}
 		}
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
+	}
 
-		base.FixedUpdate();
-    }
 
+
+
+	public override void StopMovement()
+	{
+		this.checkpoints.Clear();
+		this.IsMoving = false;
+	}
 
 	public void DebugPath()
 	{
@@ -148,5 +157,15 @@ public class BasicUnit : Unit
 			go.AddComponent<MeshFilter>().sharedMesh = Player.smesh;
 			go.AddComponent<MeshRenderer>();
 		}
+	}
+
+	public override void Hit(float damagePoints)
+	{
+		throw new System.NotImplementedException();
+	}
+
+	public override void Heal(float healingPoints)
+	{
+		throw new System.NotImplementedException();
 	}
 }
