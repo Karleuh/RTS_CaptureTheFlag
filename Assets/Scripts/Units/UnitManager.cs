@@ -37,5 +37,28 @@ public static class UnitManager
 		hs.Add(u);
 	}
 
+
+
+	public static List<Unit> OverlapCircle(Vector2 center, float radius, Team team = Team.ANY)
+	{
+		List<Unit> units = new List<Unit>();
+
+		for (int x = (int)((center.x - radius) / UnitManager.chunckSize); x <= (int)((center.x + radius) / UnitManager.chunckSize); x++)
+		{
+			for (int y = (int)((center.y - radius) / UnitManager.chunckSize); y <= (int)((center.y + radius) / UnitManager.chunckSize); y++)
+			{
+				if (UnitManager.unitsInChunk.TryGetValue(new ChunkPos(x, y), out HashSet<Unit> unitsInChunck))
+				{
+					foreach (Unit u in unitsInChunck)
+					{
+						if (Utils.SqrDistance(center, u.Position) <= radius * radius && (team == Team.ANY || u.Team == team))
+							units.Add(u);
+					}
+				}
+			}
+		}
+
+		return units;
+	}
 	
 }

@@ -11,9 +11,9 @@ public abstract class Unit : MonoBehaviour, IDamageable
 	[Header("Attack")]
 	[SerializeField] float minRange;
 	[SerializeField] float maxRange;
+	[SerializeField] float lineOfSight;
 	[SerializeField] float damage;
 	[SerializeField] float attackCooldown;
-	IDamageable target;
 
 
 
@@ -28,7 +28,9 @@ public abstract class Unit : MonoBehaviour, IDamageable
 
 	private Vector2 position;
 	private Vector3 size;
-	private UnitState unitState;
+
+	private IDamageable target;
+	private bool isAttacking;
 
 	float lastTimePathCalculated;
 
@@ -54,6 +56,10 @@ public abstract class Unit : MonoBehaviour, IDamageable
 		get => this.attackCooldown;
 	}
 
+	public float LineOfSight
+	{
+		get => this.lineOfSight;
+	}
 
 	public Formation Formation
 	{
@@ -113,10 +119,17 @@ public abstract class Unit : MonoBehaviour, IDamageable
 	public void Attack(Unit u)
 	{
 		this.target = u;
-		this.unitState = UnitState.ATTACK;
+		this.isAttacking = true;
 		this.MoveTo(u.Position);
 		this.lastTimePathCalculated = Time.time;
 	}
+
+	public void StopAttack()
+	{
+		this.StopMovement();
+		this.isAttacking = false;
+	}
+
 
 
 
@@ -129,7 +142,7 @@ public abstract class Unit : MonoBehaviour, IDamageable
 			UnitManager.OnUnitMove(this, oldcp);
 		}
 
-		if(this.unitState == UnitState.ATTACK)
+		if(this.isAttacking)
 			HandleAttack();
 	}
 
