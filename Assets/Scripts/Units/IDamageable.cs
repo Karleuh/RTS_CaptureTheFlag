@@ -6,5 +6,6 @@ public interface IDamageable
 {
 	void Hit(float damagePoints);
 	void Heal(float healingPoints);
+	bool IsDead { get; }
 	Vector2 Position { get; }
 }

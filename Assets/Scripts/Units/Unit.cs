@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour, IDamageable
+public abstract class Unit : MonoBehaviour
 {
 
 	private const int RECALCULATE_PATH_COOLDOWN = 1;
@@ -33,6 +33,10 @@ public abstract class Unit : MonoBehaviour, IDamageable
 	private bool isAttacking;
 
 	float lastTimePathCalculated;
+
+
+
+	Queue<UnitAction> unitActions = new Queue<UnitAction>();
 
 	public float MinRange
 	{
@@ -116,7 +120,7 @@ public abstract class Unit : MonoBehaviour, IDamageable
 
 
 
-	public void Attack(Unit u)
+	public void Attack(IDamageable u)
 	{
 		this.target = u;
 		this.isAttacking = true;
@@ -135,6 +139,8 @@ public abstract class Unit : MonoBehaviour, IDamageable
 
 	protected virtual void FixedUpdate()
 	{
+		//position
+
 		ChunkPos oldcp = this.ChunkPosition;
 		this.ChunkPosition = new ChunkPos(this.Position, UnitManager.chunckSize);
 		if (this.ChunkPosition != oldcp)
@@ -142,6 +148,14 @@ public abstract class Unit : MonoBehaviour, IDamageable
 			UnitManager.OnUnitMove(this, oldcp);
 		}
 
+		//actions
+		if (this.unitActions.Count > 0 && this.unitActions.Peek().IsFinished)
+			this.unitActions.Dequeue();
+
+		if (this.unitActions.Count > 0)
+			this.unitActions.Peek().FixedUpdate();
+
+		//attack
 		if(this.isAttacking)
 			HandleAttack();
 	}
@@ -171,8 +185,25 @@ public abstract class Unit : MonoBehaviour, IDamageable
 		}
 	}
 
-	public abstract void Hit(float damagePoints);
-	public abstract void Heal(float healingPoints);
+	public bool EnqueueMove(Vector2 target)
+	{
+		if (this.unitActions.Count == 0)
+			return false;
+		return this.unitActions.Peek().EnqueueMove(target);
+	}
+
+
+	public bool EnqueueAttack(IDamageable target)
+	{
+		if (this.unitActions.Count == 0)
+			return false;
+		return this.unitActions.Peek().EnqueueAttack(target);
+	}
+
+	public void EnqueueAction(UnitAction action)
+	{
+		this.unitActions.Enqueue(action);
+	}
 }
 
 

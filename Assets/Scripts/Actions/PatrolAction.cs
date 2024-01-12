@@ -11,8 +11,8 @@ class PatrolAction : UnitAction
 	List<Vector2> checkpoints = new List<Vector2>();
 	int currentIndex;
 
-	bool isTargetingUnit;
-	Unit targetUnit;
+	bool isTargetingDamageable;
+	IDamageable targetDamageable;
 	Vector2 positionLeavingPatrol;
 
 	float nextTimeToCheckForUnits;
@@ -30,7 +30,7 @@ class PatrolAction : UnitAction
 
 	public override void FixedUpdate()
 	{
-		if (!this.isTargetingUnit)
+		if (!this.isTargetingDamageable)
 		{
 			//check for units
 
@@ -39,20 +39,20 @@ class PatrolAction : UnitAction
 			{
 				this.nextTimeToCheckForUnits = Time.time + PatrolAction.CHECK_FOR_UNITS_INTERVAL;
 
-				this.targetUnit = this.FindClosestUnitInLineOfSight();
-				if (this.targetUnit != null)
+				this.targetDamageable = this.FindClosestUnitInLineOfSight();
+				if (this.targetDamageable != null)
 				{
-					this.isTargetingUnit = true;
+					this.isTargetingDamageable = true;
 
 					this.positionLeavingPatrol = this.Unit.Position;
-					this.Unit.Attack(this.targetUnit);
+					this.Unit.Attack(this.targetDamageable);
 				}
 			}
 
 
 			// follow checkpoints
 
-			if (!this.isTargetingUnit && !this.Unit.IsMoving && this.checkpoints.Count > 0)
+			if (!this.isTargetingDamageable && !this.Unit.IsMoving && this.checkpoints.Count > 0)
 			{
 				if (currentIndex >= this.checkpoints.Count)
 					currentIndex = 0;
@@ -67,18 +67,19 @@ class PatrolAction : UnitAction
 				this.nextTimeToCheckForUnits = Time.time + PatrolAction.CHECK_FOR_UNITS_INTERVAL;
 
 				//if we are too far away or the target is too far away
-				if (Utils.SqrDistance(this.positionLeavingPatrol, this.Unit.Position) > 4 * this.Unit.LineOfSight * this.Unit.LineOfSight || Utils.SqrDistance(this.targetUnit.Position, this.Unit.Position) > this.Unit.LineOfSight * this.Unit.LineOfSight)
+				if (Utils.SqrDistance(this.positionLeavingPatrol, this.Unit.Position) > 4 * this.Unit.LineOfSight * this.Unit.LineOfSight || Utils.SqrDistance(this.targetDamageable.Position, this.Unit.Position) > this.Unit.LineOfSight * this.Unit.LineOfSight)
 				{
 					this.Unit.StopAttack();
 
-					Unit unit = this.FindClosestUnitInLineOfSight();
+					IDamageable unit = this.FindClosestUnitInLineOfSight();
 					if (unit != null && Utils.SqrDistance(unit.Position, this.positionLeavingPatrol) > this.Unit.LineOfSight * this.Unit.LineOfSight)
 					{
-						this.isTargetingUnit = true;
-						this.targetUnit = unit;
+						this.isTargetingDamageable = true;
+						this.targetDamageable = unit;
 					}
 					else
 					{
+						this.isTargetingDamageable = false;
 						this.Unit.MoveTo(this.checkpoints[this.currentIndex]);
 					}
 
@@ -89,10 +90,10 @@ class PatrolAction : UnitAction
 	}
 
 
-	private Unit FindClosestUnitInLineOfSight()
+	private IDamageable FindClosestUnitInLineOfSight()
 	{
-		Unit u = null;
-		List<Unit> units = UnitManager.OverlapCircle(this.Unit.Position, this.Unit.LineOfSight, this.Unit.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
+		IDamageable u = null;
+		List<IDamageable> units = UnitManager.OverlapCircleUnitDamageable(this.Unit.Position, this.Unit.LineOfSight, this.Unit.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
 		if (units.Count > 0)
 		{
 
@@ -121,7 +122,7 @@ class PatrolAction : UnitAction
 		return true;
 	}
 
-	public override bool EnqueueAttack(Unit target)
+	public override bool EnqueueAttack(IDamageable target)
 	{
 		return false;
 	}

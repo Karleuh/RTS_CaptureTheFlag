@@ -39,9 +39,9 @@ public static class UnitManager
 
 
 
-	public static List<Unit> OverlapCircle(Vector2 center, float radius, Team team = Team.ANY)
+	public static List<IDamageable> OverlapCircleUnitDamageable(Vector2 center, float radius, Team team = Team.ANY)
 	{
-		List<Unit> units = new List<Unit>();
+		List<IDamageable> units = new List<IDamageable>();
 
 		for (int x = (int)((center.x - radius) / UnitManager.chunckSize); x <= (int)((center.x + radius) / UnitManager.chunckSize); x++)
 		{
@@ -51,8 +51,8 @@ public static class UnitManager
 				{
 					foreach (Unit u in unitsInChunck)
 					{
-						if (Utils.SqrDistance(center, u.Position) <= radius * radius && (team == Team.ANY || u.Team == team))
-							units.Add(u);
+						if (Utils.SqrDistance(center, u.Position) <= radius * radius && (team == Team.ANY || u.Team == team) && u is IDamageable)
+							units.Add((IDamageable)u);
 					}
 				}
 			}

@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
 	[Header("Gameplay")]
 	[SerializeField] 
 	Team team;
+	[SerializeField] UnitActionType unitAction;
 
 	bool isMassSelecting;
 	Vector2 startMousePos;
@@ -68,16 +69,17 @@ public class Player : MonoBehaviour
 
 		if(Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits != null)
 		{
-			Vector2Int p = Vector2Int.FloorToInt(this.GetPosFromScreenPoint(Input.mousePosition));
+			Vector2 targetPos = this.GetPosFromScreenPoint(Input.mousePosition);
+			IDamageable targetUnit = null;
+			//TODO shift button not working as intended
 
-			Unit targetUnit = null;
 			//find if we attack a unit
 			Ray r = this.cam.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
 			{
 				Unit unit = info.collider.GetComponentInParent<Unit>();
-				if(unit != null && unit.Team != this.team)
-					targetUnit = unit;
+				if(unit != null && unit is IDamageable && unit.Team != this.team)
+					targetUnit = (IDamageable)unit;
 			}
 
 			if (this.selectedUnits.Count > 1)
@@ -89,17 +91,31 @@ public class Player : MonoBehaviour
 				if (targetUnit != null)
 					form.Attack(targetUnit);
 				else
-					form.MoveTo(p);
+					form.MoveTo(targetPos);
 			}
 			else if (this.selectedUnits.Count == 1)
 			{
 				HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
 				enumerator.MoveNext();
-				enumerator.Current.MoveTo(this.GetPosFromScreenPoint(Input.mousePosition));
+
 				if (targetUnit != null)
-					enumerator.Current.Attack(targetUnit);
+				{
+					if (!Input.GetKey(KeyCode.LeftShift) || !enumerator.Current.EnqueueAttack(targetUnit))
+					{
+						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
+						enumerator.Current.EnqueueAction(action);
+						action.EnqueueAttack(targetUnit);
+					}
+				}
 				else
-					enumerator.Current.MoveTo(p);
+				{
+					if (!Input.GetKey(KeyCode.LeftShift) || !enumerator.Current.EnqueueMove(targetPos))
+					{
+						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
+						enumerator.Current.EnqueueAction(action);
+						action.EnqueueMove(targetPos);
+					}
+				}
 			}
 		}
 

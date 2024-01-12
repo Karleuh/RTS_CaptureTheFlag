@@ -157,7 +157,7 @@ public class Formation : MonoBehaviour
 	}
 
 
-	public void Attack(Unit u)
+	public void Attack(IDamageable u)
 	{
 		//this.target = Vector2Int.FloorToInt(pos) == Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) ? pos : Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) + new Vector2(0.5f, 0.5f);
 		//this.checkpoints.Clear();

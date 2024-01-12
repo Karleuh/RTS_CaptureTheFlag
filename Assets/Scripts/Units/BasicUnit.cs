@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BasicUnit : Unit
+public class BasicUnit : Unit, IDamageable
 {
 
 	//List<Vector2Int> checkpoints = new List<Vector2Int>();
 	SimpleConcatLinkedList<Vector2Int> checkpoints = new SimpleConcatLinkedList<Vector2Int>();
 	Vector2 target;
 	float timeSinceFormationSpotInObstacle;
+
+	public bool IsDead => throw new System.NotImplementedException();
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
@@ -159,12 +161,12 @@ public class BasicUnit : Unit
 		}
 	}
 
-	public override void Hit(float damagePoints)
+	public void Hit(float damagePoints)
 	{
 		throw new System.NotImplementedException();
 	}
 
-	public override void Heal(float healingPoints)
+	public void Heal(float healingPoints)
 	{
 		throw new System.NotImplementedException();
 	}

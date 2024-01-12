@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NavMeshBasicUnit : Unit
+public class NavMeshBasicUnit : Unit, IDamageable
 {
 	[SerializeField]
 	NavMeshAgent navAgent;
 
 	private Vector2 targetPos;
 
+	public bool IsDead => throw new System.NotImplementedException();
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
@@ -40,12 +41,12 @@ public class NavMeshBasicUnit : Unit
 		throw new System.NotImplementedException();
 	}
 
-	public override void Hit(float damagePoints)
+	public void Hit(float damagePoints)
 	{
 		throw new System.NotImplementedException();
 	}
 
-	public override void Heal(float healingPoints)
+	public void Heal(float healingPoints)
 	{
 		throw new System.NotImplementedException();
 	}
