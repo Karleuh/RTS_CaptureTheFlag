@@ -9,13 +9,20 @@ public class AttackMove : UnitAction
 
 	private bool isTargetingDamageables;
 	private bool isNotStarted = true;
+	//private bool isTargetingWhileMoving;
+	//private IDamageable targetWhileMoving;
+	//private Vector2 pointLeavingPathToAttack;
+
+	//private float timeToCheckForUnits;
+
+	private const float CHECK_COOLDOWN = 1;
 
 
 	public AttackMove(Unit u) : base(u) {}
 
 	public override bool IsFinished
 	{
-		get => !isNotStarted && ((this.isTargetingDamageables && this.damageables.Count == 0) || (!this.isTargetingDamageables && this.checkpoints.Count == 0));
+		get => !isNotStarted && ((this.isTargetingDamageables && this.damageables.Count == 0) || (!this.isTargetingDamageables && this.checkpoints.Count == 0) && !this.Unit.IsMoving && !this.Unit.IsAttacking);
 	}
 
 
@@ -84,11 +91,45 @@ public class AttackMove : UnitAction
 		}
 		else
 		{
+			//if(Time.time > this.timeToCheckForUnits)
+			//{
+			//	IDamageable target = this.FindClosestUnitInLineOfSight();
+			//	if(target != null)
+			//	{
+			//		this.isTargetingWhileMoving = true;
+			//		this.targetWhileMoving = target;
+			//	}
+			//}
+
 			if(!this.Unit.IsMoving && this.checkpoints.Count > 0)
 			{
 				this.Unit.MoveTo(checkpoints.Dequeue());
 			}
 		}
+	}
+
+
+	private IDamageable FindClosestUnitInLineOfSight()
+	{
+		IDamageable u = null;
+		List<IDamageable> units = UnitManager.OverlapCircleUnitDamageable(this.Unit.Position, this.Unit.LineOfSight, this.Unit.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
+		if (units.Count > 0)
+		{
+
+			//find closest unit
+			float minDistance = float.MaxValue;
+			for (int i = 0; i < units.Count; i++)
+			{
+				float dist = Utils.SqrDistance(units[i].Position, this.Unit.Position);
+				if (dist < minDistance)
+				{
+					minDistance = dist;
+					u = units[i];
+				}
+			}
+		}
+
+		return u;
 	}
 }
 
