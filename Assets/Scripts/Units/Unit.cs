@@ -200,8 +200,15 @@ public abstract class Unit : MonoBehaviour
 		return this.unitActions.Peek().EnqueueAttack(target);
 	}
 
-	public void EnqueueAction(UnitAction action)
+	public void EnqueueAction(UnitAction action, bool clear)
 	{
+		if (clear)
+		{
+			this.unitActions.Clear();
+			this.StopAttack();
+			this.StopMovement();
+		}
+
 		this.unitActions.Enqueue(action);
 	}
 }

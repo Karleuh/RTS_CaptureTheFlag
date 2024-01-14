@@ -37,7 +37,6 @@ public class Player : MonoBehaviour
 
 	List<GameObject> selectionCircles = new List<GameObject>();
 
-
 	private Vector3 camForward;
 
 
@@ -78,7 +77,8 @@ public class Player : MonoBehaviour
 			if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
 			{
 				Unit unit = info.collider.GetComponentInParent<Unit>();
-				if(unit != null && unit is IDamageable && unit.Team != this.team)
+				IDamageable damageable = unit as IDamageable;
+				if(unit != null && !damageable.IsDead && unit.Team != this.team)
 					targetUnit = (IDamageable)unit;
 			}
 
@@ -98,22 +98,24 @@ public class Player : MonoBehaviour
 				HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
 				enumerator.MoveNext();
 
+				bool isShifting = Input.GetKey(KeyCode.LeftShift);
 				if (targetUnit != null)
 				{
-					if (!Input.GetKey(KeyCode.LeftShift) || !enumerator.Current.EnqueueAttack(targetUnit))
+
+					if (!isShifting || !enumerator.Current.EnqueueAttack(targetUnit))
 					{
 						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-						enumerator.Current.EnqueueAction(action);
 						action.EnqueueAttack(targetUnit);
+						enumerator.Current.EnqueueAction(action, !isShifting);
 					}
 				}
 				else
 				{
-					if (!Input.GetKey(KeyCode.LeftShift) || !enumerator.Current.EnqueueMove(targetPos))
+					if (!isShifting || !enumerator.Current.EnqueueMove(targetPos))
 					{
 						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-						enumerator.Current.EnqueueAction(action);
 						action.EnqueueMove(targetPos);
+						enumerator.Current.EnqueueAction(action, !isShifting);
 					}
 				}
 			}

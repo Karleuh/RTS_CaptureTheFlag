@@ -9,7 +9,7 @@ public class BasicUnit : Unit, IDamageable
 	Vector2 target;
 	float timeSinceFormationSpotInObstacle;
 
-	public bool IsDead => throw new System.NotImplementedException();
+	public bool IsDead => false;
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{

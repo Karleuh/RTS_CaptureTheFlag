@@ -54,25 +54,42 @@ class PatrolAction : UnitAction
 
 			if (!this.isTargetingDamageable && !this.Unit.IsMoving && this.checkpoints.Count > 0)
 			{
-				if (currentIndex >= this.checkpoints.Count)
-					currentIndex = 0;
+				this.currentIndex++;
+				if (this.currentIndex >= this.checkpoints.Count)
+					this.currentIndex = 0;
 
-				this.Unit.MoveTo(this.checkpoints[this.currentIndex++]);
+				this.Unit.MoveTo(this.checkpoints[this.currentIndex]);
 			}
 		}
 		else
 		{
-			if (Time.time > this.nextTimeToCheckForUnits)
+			if(this.targetDamageable.IsDead)
+			{
+				this.Unit.StopAttack();
+
+				IDamageable unit = this.FindClosestUnitInLineOfSight();
+				if (unit != null && Utils.SqrDistance(this.positionLeavingPatrol, this.targetDamageable.Position) <= 4 * this.Unit.LineOfSight * this.Unit.LineOfSight)
+				{
+					this.isTargetingDamageable = true;
+					this.targetDamageable = unit;
+				}
+				else
+				{
+					this.isTargetingDamageable = false;
+					this.Unit.MoveTo(this.checkpoints[this.currentIndex]);
+				}
+			}
+			else if (Time.time > this.nextTimeToCheckForUnits)
 			{
 				this.nextTimeToCheckForUnits = Time.time + PatrolAction.CHECK_FOR_UNITS_INTERVAL;
 
 				//if we are too far away or the target is too far away
-				if (Utils.SqrDistance(this.positionLeavingPatrol, this.Unit.Position) > 4 * this.Unit.LineOfSight * this.Unit.LineOfSight || Utils.SqrDistance(this.targetDamageable.Position, this.Unit.Position) > this.Unit.LineOfSight * this.Unit.LineOfSight)
+				if (Utils.SqrDistance(this.positionLeavingPatrol, this.targetDamageable.Position) > 4 * this.Unit.LineOfSight * this.Unit.LineOfSight)
 				{
 					this.Unit.StopAttack();
 
 					IDamageable unit = this.FindClosestUnitInLineOfSight();
-					if (unit != null && Utils.SqrDistance(unit.Position, this.positionLeavingPatrol) > this.Unit.LineOfSight * this.Unit.LineOfSight)
+					if (unit != null && Utils.SqrDistance(this.positionLeavingPatrol, this.targetDamageable.Position) <= 4 * this.Unit.LineOfSight * this.Unit.LineOfSight)
 					{
 						this.isTargetingDamageable = true;
 						this.targetDamageable = unit;
@@ -82,8 +99,6 @@ class PatrolAction : UnitAction
 						this.isTargetingDamageable = false;
 						this.Unit.MoveTo(this.checkpoints[this.currentIndex]);
 					}
-
-					//TODO check if unit is dead or change is targeting
 				}
 			}
 		}

@@ -51,8 +51,9 @@ public static class UnitManager
 				{
 					foreach (Unit u in unitsInChunck)
 					{
-						if (Utils.SqrDistance(center, u.Position) <= radius * radius && (team == Team.ANY || u.Team == team) && u is IDamageable)
-							units.Add((IDamageable)u);
+						IDamageable damageable = u as IDamageable;
+						if (Utils.SqrDistance(center, u.Position) <= radius * radius && (team == Team.ANY || u.Team == team) && damageable != null && !damageable.IsDead)
+							units.Add(damageable);
 					}
 				}
 			}
