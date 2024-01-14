@@ -13,7 +13,7 @@ public abstract class UnitAction
 		switch(type)
 		{
 			case UnitActionType.ATTACK_MOVE:
-				return null;
+				return new AttackMove(unit);
 			case UnitActionType.PATROL:
 				return new PatrolAction(unit);
 		}

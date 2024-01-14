@@ -30,7 +30,6 @@ public abstract class Unit : MonoBehaviour
 	private Vector3 size;
 
 	private IDamageable target;
-	private bool isAttacking;
 
 	float lastTimePathCalculated;
 
@@ -91,6 +90,7 @@ public abstract class Unit : MonoBehaviour
 
 
 	public bool IsMoving { get; protected set; }
+	public bool IsAttacking { get; private set; }
 
 
 	public virtual Vector2 Position
@@ -123,7 +123,7 @@ public abstract class Unit : MonoBehaviour
 	public void Attack(IDamageable u)
 	{
 		this.target = u;
-		this.isAttacking = true;
+		this.IsAttacking = true;
 		this.MoveTo(u.Position);
 		this.lastTimePathCalculated = Time.time;
 	}
@@ -131,7 +131,7 @@ public abstract class Unit : MonoBehaviour
 	public void StopAttack()
 	{
 		this.StopMovement();
-		this.isAttacking = false;
+		this.IsAttacking = false;
 	}
 
 
@@ -156,13 +156,15 @@ public abstract class Unit : MonoBehaviour
 			this.unitActions.Peek().FixedUpdate();
 
 		//attack
-		if(this.isAttacking)
+		if(this.IsAttacking)
 			HandleAttack();
 	}
 
 	private void HandleAttack()
 	{
-		if(Utils.SqrDistance(this.Position, target.Position) > this.MaxRange * this.MaxRange)
+		if (this.target.IsDead)
+			this.StopAttack();
+		else if(Utils.SqrDistance(this.Position, target.Position) > this.MaxRange * this.MaxRange)
 		{
 			if(this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
 			{
