@@ -13,6 +13,8 @@ public class Formation : Unit
 
 	bool waitForPosition;
 
+	FormationType FormationType { get; set; }
+
 
 	public void OnCreation(IEnumerable<Unit> units)
 	{
@@ -40,6 +42,8 @@ public class Formation : Unit
 
 		this.Position = pos / this.units.Count;
 		this.transform.position = new Vector3(this.Position.x, 0, this.Position.y);
+
+		this.waitForPosition = true;
 	}
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
@@ -60,7 +64,7 @@ public class Formation : Unit
 			this.forward = Vector2.up; 
 
 		this.UpdateUnits(true);
-		this.waitForPosition = true;
+		//this.waitForPosition = true;
 	}
 
 
@@ -157,23 +161,39 @@ public class Formation : Unit
 
 
 
-
-
+	[Range(0, 10)]
+	[SerializeField]
+	float ratio = 2;
 
 	private void UpdateUnits(bool isFirstMove = false)
 	{
-		for(int i=0; i<this.units.Count; i++)
+		switch (this.FormationType)
 		{
-			Vector2 left = Vector2.Perpendicular(this.forward);
-			// balance on multiple ticks
-			Vector2 u = this.Position + left * (i - this.units.Count / 2);
-			Vector2Int flu = Vector2Int.FloorToInt(u);
-			if (Terrain.instance.IsInTerrain(flu))
-			{
-				//if(!Terrain.instance.IsObstacle(flu))
-				this.units[i].MoveTo(u, !isFirstMove);
-				//else if (this.updateCount % 2 * ((int)(1.0f / Time.fixedDeltaTime)) == 0)
-			}
+			case FormationType.LINE:
+				for (int i = 0; i < this.units.Count; i++)
+				{
+					int width = ((int)Mathf.Sqrt(ratio * this.units.Count));
+					if (width == 0)
+						width = 1;
+					
+					Vector2 left = Vector2.Perpendicular(this.forward);
+					Vector2 u = this.Position + left * 1.2f * (i % width - width / 2) - this.forward * 1.2f*(i/width);
+					Vector2Int flu = Vector2Int.FloorToInt(u);
+					if (Terrain.instance.IsInTerrain(flu))
+					{
+						this.units[i].MoveTo(u, !isFirstMove);
+					}
+				}
+				break;
+			case FormationType.SQUARE:
+
+				break;
+			case FormationType.SPACED:
+
+				break;
+			case FormationType.SEPERATED:
+
+				break;
 		}
 	}
 
@@ -183,4 +203,13 @@ public class Formation : Unit
 		this.IsMoving = false;
 		this.checkpoints.Clear();
 	}
+}
+
+
+public enum FormationType
+{
+	LINE,
+	SQUARE,
+	SPACED,
+	SEPERATED
 }

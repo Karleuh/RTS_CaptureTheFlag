@@ -61,6 +61,8 @@ public class BasicUnit : Unit, IDamageable
 						this.checkpoints.ConcatBefore(temp);
 					}
 				}
+
+				AStar.SmoothPath(this.checkpoints);
 			}
 			else
 				this.checkpoints.Clear();
@@ -118,7 +120,7 @@ public class BasicUnit : Unit, IDamageable
 			else
 				tempTarget = new Vector3(this.target.x, 0, this.target.y);
 
-			bool isLateInFormationOrNotInFormation = this.Formation == null || (this.target - this.Position).sqrMagnitude > .75f;
+			bool isLateInFormationOrNotInFormation = this.Formation == null || (this.target - this.Position).sqrMagnitude > .25f;
 			float currentSpeed = isLateInFormationOrNotInFormation ? this.Speed : this.Formation.Speed;
 
 			Vector3 forward = (tempTarget - this.transform.position).normalized;

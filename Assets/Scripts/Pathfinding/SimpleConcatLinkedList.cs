@@ -257,6 +257,30 @@ public class SimpleConcatLinkedList<T> : ICollection<T>
 		return false;
 	}
 
+	public bool Remove(SimpleConcatLinkedListNode<T> node, SimpleConcatLinkedListNode<T> next)
+	{
+		if (this.Count == 0)
+			return false;
+		else if (this.Count == 1)
+		{
+			if (this.First == node)
+			{
+				this.Clear();
+				return true;
+			}
+			
+		}
+		else if (node != null)
+		{
+			next.Prev = node.Prev;
+			if (this.First == node)
+				this.First = next;
+			this.Count -= 1;
+		}
+
+		return false;
+	}
+
 	public struct Enumerator : IEnumerator<T>
 	{
 		private T _current;

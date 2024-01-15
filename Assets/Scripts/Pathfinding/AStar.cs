@@ -138,6 +138,30 @@ public static class AStar
 
 	}
 
+	public static void SmoothPath(SimpleConcatLinkedList<Vector2Int> path)
+	{
+		if (path.Count <= 2)
+			return;
+
+		SimpleConcatLinkedListNode<Vector2Int> next = path.Last;
+		SimpleConcatLinkedListNode<Vector2Int> current = next.Prev;
+
+		while (current != path.First)
+		{
+			if (IsLineWalkable(next.Value, current.Prev.Value))
+			{
+				path.Remove(current, next);
+				current = current.Prev;
+			}
+			else
+			{
+				next = current;
+				current = next.Prev;
+			}
+		}
+
+	}
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsLineWalkable(Vector2Int from, Vector2Int to)
 	{
