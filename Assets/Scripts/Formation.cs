@@ -2,23 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Formation : MonoBehaviour
+public class Formation : Unit
 {
 	protected List<Unit> units = new List<Unit>();
 
 	protected Vector2 forward;
-	protected Vector2 position;
 
 	List<Vector2Int> checkpoints = new List<Vector2Int>();
 	Vector2 target;
 
 	bool waitForPosition;
 
-	public float Speed
-	{
-		get;
-		private set;
-	}
 
 	public void OnCreation(IEnumerable<Unit> units)
 	{
@@ -43,23 +37,25 @@ public class Formation : MonoBehaviour
 				pos += unit.Position;
 		}
 		this.Speed = 0.75f * this.Speed;
-		Debug.Log("Speed : " + this.Speed);
 
-		this.position = pos / this.units.Count;
-		this.transform.position = new Vector3(this.position.x, 0, this.position.y);
+		this.Position = pos / this.units.Count;
+		this.transform.position = new Vector3(this.Position.x, 0, this.Position.y);
 	}
 
-	public void MoveTo(Vector2 pos)
+	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
+		this.IsMoving = true;
+
 		this.target = Vector2Int.FloorToInt(pos) == Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) ? pos : Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) + new Vector2(0.5f, 0.5f);
 		this.checkpoints.Clear();
-		this.position = new Vector2(this.transform.position.x, this.transform.position.z);
-		AStar.A_Star(this.position, this.target, this.checkpoints);
+		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
+
+		AStar.A_Star(this.Position, this.target, this.checkpoints);
 
 		if (this.checkpoints.Count >= 2)
 			this.forward = ((Vector2)(this.checkpoints[this.checkpoints.Count - 2] - this.checkpoints[this.checkpoints.Count - 1])).normalized;
 		else
-			this.forward = (this.target - this.position).normalized;
+			this.forward = (this.target - this.Position).normalized;
 		if (this.forward.sqrMagnitude == 0)
 			this.forward = Vector2.up; 
 
@@ -68,8 +64,10 @@ public class Formation : MonoBehaviour
 	}
 
 
-	public void FixedUpdate()
+	protected override void FixedUpdate()
 	{
+		base.FixedUpdate();
+
 		if (this.waitForPosition)
 		{
 			foreach(Unit u in this.units)
@@ -77,8 +75,28 @@ public class Formation : MonoBehaviour
 					return;
 			this.waitForPosition = false;
 		}
-		this.UpdatePosition();
-		this.UpdateUnits();
+
+
+
+		if (this.IsMoving)
+		{
+			this.UpdatePosition();
+			this.UpdateUnits();
+		}
+
+
+		if (this.IsAttacking && this.IsTargetInRange())
+		{
+			GameObject.Destroy(this.gameObject);
+
+			foreach (Unit u in this.units)
+			{
+				u.LeaveFormationWithoutNotification();
+				AttackMoveAction action = new AttackMoveAction(u);
+				action.EnqueueAttack(this.DamageableTarget);
+				u.EnqueueAction(action, true);
+			}
+		}
 	}
 
 
@@ -106,7 +124,7 @@ public class Formation : MonoBehaviour
 		if ((this.transform.position - tempTarget).sqrMagnitude < 0.25f)
 		{
 			if (isLastCheckpoint)
-				this.DestroyFormation();
+				this.IsMoving = false;
 			else
 				this.checkpoints.RemoveAt(this.checkpoints.Count - 1);
 		}
@@ -115,7 +133,7 @@ public class Formation : MonoBehaviour
 
 
 		this.forward = new Vector2(forw.x, forw.z);
-		this.position = new Vector2(this.transform.position.x, this.transform.position.z);
+		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
 	}
 
 
@@ -131,6 +149,9 @@ public class Formation : MonoBehaviour
 	public void RemoveUnit(Unit u)
 	{
 		this.units.Remove(u);
+
+		if (this.units.Count == 0)
+			this.DestroyFormation();
 	}
 
 
@@ -145,7 +166,7 @@ public class Formation : MonoBehaviour
 		{
 			Vector2 left = Vector2.Perpendicular(this.forward);
 			// balance on multiple ticks
-			Vector2 u = this.position + left * (i - this.units.Count / 2);
+			Vector2 u = this.Position + left * (i - this.units.Count / 2);
 			Vector2Int flu = Vector2Int.FloorToInt(u);
 			if (Terrain.instance.IsInTerrain(flu))
 			{
@@ -157,21 +178,9 @@ public class Formation : MonoBehaviour
 	}
 
 
-	public void Attack(IDamageable u)
+	public override void StopMovement()
 	{
-		//this.target = Vector2Int.FloorToInt(pos) == Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) ? pos : Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) + new Vector2(0.5f, 0.5f);
-		//this.checkpoints.Clear();
-		//this.position = new Vector2(this.transform.position.x, this.transform.position.z);
-		//AStar.A_Star(this.position, this.target, this.checkpoints);
-
-		//if (this.checkpoints.Count >= 2)
-		//	this.forward = ((Vector2)(this.checkpoints[this.checkpoints.Count - 2] - this.checkpoints[this.checkpoints.Count - 1])).normalized;
-		//else
-		//	this.forward = (this.target - this.position).normalized;
-		//if (this.forward.sqrMagnitude == 0)
-		//	this.forward = Vector2.up;
-
-		//this.UpdateUnits(true);
-		//this.waitForPosition = true;
+		this.IsMoving = false;
+		this.checkpoints.Clear();
 	}
 }

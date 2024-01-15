@@ -29,7 +29,7 @@ public abstract class Unit : MonoBehaviour
 	private Vector2 position;
 	private Vector3 size;
 
-	private IDamageable target;
+	public IDamageable DamageableTarget { get; private set; }
 
 	float lastTimePathCalculated;
 
@@ -67,11 +67,6 @@ public abstract class Unit : MonoBehaviour
 	public UnitActionType UnitActionType
 	{
 		get => this.unitActions.Count == 0 ? UnitActionType.NONE : this.unitActions.Peek().UnitActionType;
-	}
-
-	public bool IsFriendlyAction
-	{
-		get => this.unitActions.Count == 0 ? false : this.unitActions.Peek().IsFriendlyAction;
 	}
 
 	public Formation Formation
@@ -132,10 +127,18 @@ public abstract class Unit : MonoBehaviour
 
 	public void Attack(IDamageable u)
 	{
-		this.target = u;
+		this.DamageableTarget = u;
 		this.IsAttacking = true;
 		this.MoveTo(u.Position);
 		this.lastTimePathCalculated = Time.time;
+	}
+
+	public bool IsTargetInRange()
+	{
+		if (!this.IsAttacking)
+			return false;
+		float sqrdist = Utils.SqrDistance(this.DamageableTarget.Position, this.Position);
+		return sqrdist > this.MinRange * this.MinRange && sqrdist < this.MaxRange * this.MaxRange;
 	}
 
 	public void StopAttack()
@@ -172,22 +175,22 @@ public abstract class Unit : MonoBehaviour
 
 	private void HandleAttack()
 	{
-		if (this.target.IsDead)
+		if (this.DamageableTarget.IsDead)
 			this.StopAttack();
-		else if(Utils.SqrDistance(this.Position, target.Position) > this.MaxRange * this.MaxRange)
+		else if(Utils.SqrDistance(this.Position, DamageableTarget.Position) > this.MaxRange * this.MaxRange)
 		{
 			if(this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
 			{
-				this.MoveTo(this.target.Position);
+				this.MoveTo(this.DamageableTarget.Position);
 				this.lastTimePathCalculated = Time.time;
 			}
 		}
-		else if(Utils.SqrDistance(this.Position, target.Position) < this.MinRange * this.MinRange)
+		else if(Utils.SqrDistance(this.Position, DamageableTarget.Position) < this.MinRange * this.MinRange)
 		{
 			if (this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
 			{
-				Vector2 dir = (this.Position - this.target.Position).normalized;
-				this.MoveTo(this.target.Position + dir * this.MaxRange);
+				Vector2 dir = (this.Position - this.DamageableTarget.Position).normalized;
+				this.MoveTo(this.DamageableTarget.Position + dir * this.MaxRange);
 				this.lastTimePathCalculated = Time.time;
 			}
 		}

@@ -35,6 +35,8 @@ public class Player : MonoBehaviour
 	[Header("UI")]
 	[SerializeField]
 	RectTransform orderPanel;
+	[SerializeField]
+	Canvas canvas;
 	
 
 	bool isMassSelecting;
@@ -45,7 +47,7 @@ public class Player : MonoBehaviour
 	List<GameObject> selectionCircles = new List<GameObject>();
 
 	private Vector3 camForward;
-
+	private Formation currentFormation;
 
 
 
@@ -78,7 +80,7 @@ public class Player : MonoBehaviour
 
 
 
-		if(!isPointerOverUI && Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits != null)
+		if(!isPointerOverUI && Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits.Count > 0)
 		{
 			this.HandleAction();
 		}
@@ -140,42 +142,47 @@ public class Player : MonoBehaviour
 				targetUnit = damageable;
 		}
 
-		if (this.selectedUnits.Count > 1)
-		{
-			Formation form = new GameObject().AddComponent<Formation>();
-			form.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
-			form.gameObject.AddComponent<MeshRenderer>();
-			form.OnCreation(this.selectedUnits);
+		Unit currentUnit = null;
 
-			if (targetUnit != null)
-				form.Attack(targetUnit);
-			else
-				form.MoveTo(targetPos);
+		if(this.currentFormation != null)
+		{
+			currentUnit = currentFormation;
+		}
+		else if (this.selectedUnits.Count > 1)
+		{
+			this.currentFormation = new GameObject().AddComponent<Formation>();
+			this.currentFormation.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
+			this.currentFormation.gameObject.AddComponent<MeshRenderer>();
+			this.currentFormation.OnCreation(this.selectedUnits);
+
+			currentUnit = this.currentFormation;
 		}
 		else if (this.selectedUnits.Count == 1)
 		{
 			HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
 			enumerator.MoveNext();
 
-			bool isShifting = Input.GetKey(KeyCode.LeftShift);
-			if (targetUnit != null)
-			{
+			currentUnit = enumerator.Current;
+		}
 
-				if (unitAction != enumerator.Current.UnitActionType || !isShifting || !enumerator.Current.EnqueueAttack(targetUnit))
-				{
-					UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-					if(action.EnqueueAttack(targetUnit))
-						enumerator.Current.EnqueueAction(action, !isShifting);
-				}
-			}
-			else
+		bool isShifting = Input.GetKey(KeyCode.LeftShift);
+		if (targetUnit != null)
+		{
+
+			if (unitAction != currentUnit.UnitActionType || !isShifting || !currentUnit.EnqueueAttack(targetUnit))
 			{
-				if (unitAction != enumerator.Current.UnitActionType || !isShifting || !enumerator.Current.EnqueueMove(targetPos))
-				{
-					UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-					if(action.EnqueueMove(targetPos))
-						enumerator.Current.EnqueueAction(action, !isShifting);
-				}
+				UnitAction action = UnitAction.FromType(this.unitAction, currentUnit);
+				if (action.EnqueueAttack(targetUnit))
+					currentUnit.EnqueueAction(action, !isShifting);
+			}
+		}
+		else
+		{
+			if (unitAction != currentUnit.UnitActionType || !isShifting || !currentUnit.EnqueueMove(targetPos))
+			{
+				UnitAction action = UnitAction.FromType(this.unitAction, currentUnit);
+				if (action.EnqueueMove(targetPos))
+					currentUnit.EnqueueAction(action, !isShifting);
 			}
 		}
 	}
@@ -186,6 +193,7 @@ public class Player : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
+			this.currentFormation = null;
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
 				foreach(var circle in this.selectionCircles)
@@ -211,12 +219,12 @@ public class Player : MonoBehaviour
 			{
 				float w = Input.mousePosition.x - this.startMousePos.x;
 				float h = Input.mousePosition.y - this.startMousePos.y;
-				this.selectionSquare.anchoredPosition = this.startMousePos + new Vector2(w / 2, h / 2);
+				this.selectionSquare.anchoredPosition = (this.startMousePos + new Vector2(w / 2, h / 2)) / canvas.scaleFactor;
 				this.selectionSquare.sizeDelta = new Vector2
 				(
 					Mathf.Clamp(Mathf.Abs(w), this.minMassSelectingDistance, Mathf.Infinity),
 					Mathf.Clamp(Mathf.Abs(Mathf.Abs(h)), this.minMassSelectingDistance, Mathf.Infinity)
-				);
+				) / canvas.scaleFactor;
 			}
 
 		}
@@ -225,6 +233,7 @@ public class Player : MonoBehaviour
 		{
 			if (this.isMassSelecting)
 			{
+				//TODO fix selection
 				Vector2 tl = this.GetPosFromScreenPoint(this.startMousePos);
 				Vector2 br = this.GetPosFromScreenPoint(Input.mousePosition);
 				Vector2 tr = this.GetPosFromScreenPoint(new Vector3(Input.mousePosition.x, this.startMousePos.y));
