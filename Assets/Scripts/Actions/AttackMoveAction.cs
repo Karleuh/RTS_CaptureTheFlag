@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackMove : UnitAction
+public class AttackMoveAction : UnitAction
 {
 	private Queue<Vector2> checkpoints;
 	private Queue<IDamageable> damageables;
@@ -18,16 +18,22 @@ public class AttackMove : UnitAction
 	private const float CHECK_COOLDOWN = 1;
 
 
-	public AttackMove(Unit u) : base(u) {}
+	public AttackMoveAction(Unit u) : base(u) {}
 
 	public override bool IsFinished
 	{
 		get => !isNotStarted && ((this.isTargetingDamageables && this.damageables.Count == 0) || (!this.isTargetingDamageables && this.checkpoints.Count == 0) && !this.Unit.IsMoving && !this.Unit.IsAttacking);
 	}
 
+	public override UnitActionType UnitActionType => UnitActionType.ATTACK_MOVE;
+
+	public override bool IsFriendlyAction => false;
 
 	public override bool EnqueueAttack(IDamageable target)
 	{
+		if (target.Team == this.Unit.Team) 
+			return false;
+
 		if(this.isNotStarted)
 		{
 			this.isNotStarted = false;
@@ -93,6 +99,7 @@ public class AttackMove : UnitAction
 		{
 			//if(Time.time > this.timeToCheckForUnits)
 			//{
+			//	this.timeToCheckForUnits = Time.time + AttackMoveAction.CHECK_COOLDOWN;
 			//	IDamageable target = this.FindClosestUnitInLineOfSight();
 			//	if(target != null)
 			//	{
@@ -101,7 +108,7 @@ public class AttackMove : UnitAction
 			//	}
 			//}
 
-			if(!this.Unit.IsMoving && this.checkpoints.Count > 0)
+			if (!this.Unit.IsMoving && this.checkpoints.Count > 0)
 			{
 				this.Unit.MoveTo(checkpoints.Dequeue());
 			}

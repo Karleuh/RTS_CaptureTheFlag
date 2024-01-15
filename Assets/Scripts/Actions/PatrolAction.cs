@@ -20,8 +20,9 @@ class PatrolAction : UnitAction
 
 	public override bool IsFinished { get => this.isFinished; }
 
+	public override UnitActionType UnitActionType => UnitActionType.PATROL;
 
-
+	public override bool IsFriendlyAction => false;
 
 	public PatrolAction(Unit unit) : base(unit)
 	{

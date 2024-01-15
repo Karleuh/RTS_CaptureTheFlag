@@ -64,6 +64,16 @@ public abstract class Unit : MonoBehaviour
 		get => this.lineOfSight;
 	}
 
+	public UnitActionType UnitActionType
+	{
+		get => this.unitActions.Count == 0 ? UnitActionType.NONE : this.unitActions.Peek().UnitActionType;
+	}
+
+	public bool IsFriendlyAction
+	{
+		get => this.unitActions.Count == 0 ? false : this.unitActions.Peek().IsFriendlyAction;
+	}
+
 	public Formation Formation
 	{
 		protected get => this._formation;

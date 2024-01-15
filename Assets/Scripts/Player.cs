@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
@@ -29,6 +30,12 @@ public class Player : MonoBehaviour
 	[SerializeField] 
 	Team team;
 	[SerializeField] UnitActionType unitAction;
+
+
+	[Header("UI")]
+	[SerializeField]
+	RectTransform orderPanel;
+	
 
 	bool isMassSelecting;
 	Vector2 startMousePos;
@@ -64,61 +71,16 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		HandleSelection();
+		bool isPointerOverUI = this.IsPointerOverUI();
 
-		if(Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits != null)
+		if(!isPointerOverUI)
+			HandleSelection();
+
+
+
+		if(!isPointerOverUI && Input.GetKeyDown(KeyCode.Mouse1) && this.selectedUnits != null)
 		{
-			Vector2 targetPos = this.GetPosFromScreenPoint(Input.mousePosition);
-			IDamageable targetUnit = null;
-			//TODO shift button not working as intended
-
-			//find if we attack a unit
-			Ray r = this.cam.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
-			{
-				Unit unit = info.collider.GetComponentInParent<Unit>();
-				IDamageable damageable = unit as IDamageable;
-				if(unit != null && !damageable.IsDead && unit.Team != this.team)
-					targetUnit = (IDamageable)unit;
-			}
-
-			if (this.selectedUnits.Count > 1)
-			{
-				Formation form = new GameObject().AddComponent<Formation>();
-				form.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
-				form.gameObject.AddComponent<MeshRenderer>();
-				form.OnCreation(this.selectedUnits);
-				if (targetUnit != null)
-					form.Attack(targetUnit);
-				else
-					form.MoveTo(targetPos);
-			}
-			else if (this.selectedUnits.Count == 1)
-			{
-				HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
-				enumerator.MoveNext();
-
-				bool isShifting = Input.GetKey(KeyCode.LeftShift);
-				if (targetUnit != null)
-				{
-
-					if (!isShifting || !enumerator.Current.EnqueueAttack(targetUnit))
-					{
-						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-						action.EnqueueAttack(targetUnit);
-						enumerator.Current.EnqueueAction(action, !isShifting);
-					}
-				}
-				else
-				{
-					if (!isShifting || !enumerator.Current.EnqueueMove(targetPos))
-					{
-						UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
-						action.EnqueueMove(targetPos);
-						enumerator.Current.EnqueueAction(action, !isShifting);
-					}
-				}
-			}
+			this.HandleAction();
 		}
 
 		if(Input.GetKeyDown(KeyCode.M))
@@ -160,6 +122,62 @@ public class Player : MonoBehaviour
 
 		this.cam.transform.Translate(cammove, Space.World);
 
+	}
+
+
+	private void HandleAction()
+	{
+		Vector2 targetPos = this.GetPosFromScreenPoint(Input.mousePosition);
+		IDamageable targetUnit = null;
+
+		//find if we attack a unit
+		Ray r = this.cam.ScreenPointToRay(Input.mousePosition);
+		if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
+		{
+			Unit unit = info.collider.GetComponentInParent<Unit>();
+			IDamageable damageable = unit as IDamageable;
+			if (unit != null && !damageable.IsDead) //TODO pas ouf, faudrait vérifier la team
+				targetUnit = damageable;
+		}
+
+		if (this.selectedUnits.Count > 1)
+		{
+			Formation form = new GameObject().AddComponent<Formation>();
+			form.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
+			form.gameObject.AddComponent<MeshRenderer>();
+			form.OnCreation(this.selectedUnits);
+
+			if (targetUnit != null)
+				form.Attack(targetUnit);
+			else
+				form.MoveTo(targetPos);
+		}
+		else if (this.selectedUnits.Count == 1)
+		{
+			HashSet<Unit>.Enumerator enumerator = this.selectedUnits.GetEnumerator();
+			enumerator.MoveNext();
+
+			bool isShifting = Input.GetKey(KeyCode.LeftShift);
+			if (targetUnit != null)
+			{
+
+				if (unitAction != enumerator.Current.UnitActionType || !isShifting || !enumerator.Current.EnqueueAttack(targetUnit))
+				{
+					UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
+					if(action.EnqueueAttack(targetUnit))
+						enumerator.Current.EnqueueAction(action, !isShifting);
+				}
+			}
+			else
+			{
+				if (unitAction != enumerator.Current.UnitActionType || !isShifting || !enumerator.Current.EnqueueMove(targetPos))
+				{
+					UnitAction action = UnitAction.FromType(this.unitAction, enumerator.Current);
+					if(action.EnqueueMove(targetPos))
+						enumerator.Current.EnqueueAction(action, !isShifting);
+				}
+			}
+		}
 	}
 
 
@@ -315,4 +333,34 @@ public class Player : MonoBehaviour
 		}
 		return null;
 	}
+
+
+
+
+	//UI
+
+
+	private bool IsPointerOverUI()
+	{
+		if (!EventSystem.current.IsPointerOverGameObject() || this.isMassSelecting)
+			return false;
+
+		return true;
+	}
+
+	public void OnButtonOrderClick(int unitActionType)
+	{
+		this.unitAction = (UnitActionType)unitActionType;
+		for(int i=0; i<this.orderPanel.childCount; i++)
+		{
+			RectTransform child = this.orderPanel.GetChild(i) as RectTransform;
+
+			child.GetChild(0).GetChild(0).gameObject.SetActive(i == unitActionType - 1);
+		}
+	}
+
 }
+
+
+
+

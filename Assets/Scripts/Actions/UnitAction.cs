@@ -2,8 +2,10 @@
 
 public enum UnitActionType
 {
+	NONE,
 	ATTACK_MOVE,
-	PATROL
+	PATROL,
+	DEFEND
 }
 
 public abstract class UnitAction
@@ -13,9 +15,11 @@ public abstract class UnitAction
 		switch(type)
 		{
 			case UnitActionType.ATTACK_MOVE:
-				return new AttackMove(unit);
+				return new AttackMoveAction(unit);
 			case UnitActionType.PATROL:
 				return new PatrolAction(unit);
+			case UnitActionType.DEFEND:
+				return new DefendAction(unit);
 		}
 
 		return null;
@@ -46,5 +50,8 @@ public abstract class UnitAction
 	/// <param name="target"></param>
 	/// <returns> True if the attack order is used, False if this does not correspond to this action </returns>
 	public abstract bool EnqueueAttack(IDamageable target);
+
+	public abstract UnitActionType UnitActionType { get; }
+	public abstract bool IsFriendlyAction { get; }
 }
 
