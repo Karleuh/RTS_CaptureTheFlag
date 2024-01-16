@@ -13,7 +13,7 @@ public class Formation : Unit
 
 	bool waitForPosition;
 
-	FormationType FormationType { get; set; }
+	public FormationType FormationType { get; set; } = FormationType.LINE;
 
 
 	public void OnCreation(IEnumerable<Unit> units)
@@ -72,7 +72,7 @@ public class Formation : Unit
 	{
 		base.FixedUpdate();
 
-		if (this.waitForPosition)
+		if (this.IsMoving && this.waitForPosition)
 		{
 			foreach(Unit u in this.units)
 				if (u.IsMoving)
@@ -80,7 +80,8 @@ public class Formation : Unit
 			this.waitForPosition = false;
 		}
 
-
+		if (!this.IsMoving && !this.IsAttacking && this.IsWaitingForAction)
+			this.waitForPosition = true;
 
 		if (this.IsMoving)
 		{
@@ -170,13 +171,15 @@ public class Formation : Unit
 		switch (this.FormationType)
 		{
 			case FormationType.LINE:
+				int width = ((int)Mathf.Sqrt(ratio * this.units.Count));
+				if (width == 0)
+					width = 1;
+
+				Vector2 left = Vector2.Perpendicular(this.forward);
+
 				for (int i = 0; i < this.units.Count; i++)
 				{
-					int width = ((int)Mathf.Sqrt(ratio * this.units.Count));
-					if (width == 0)
-						width = 1;
-					
-					Vector2 left = Vector2.Perpendicular(this.forward);
+
 					Vector2 u = this.Position + left * 1.2f * (i % width - width / 2) - this.forward * 1.2f*(i/width);
 					Vector2Int flu = Vector2Int.FloorToInt(u);
 					if (Terrain.instance.IsInTerrain(flu))
@@ -189,10 +192,55 @@ public class Formation : Unit
 
 				break;
 			case FormationType.SPACED:
+				int doubleWidth = ((int)Mathf.Sqrt(ratio*2 * this.units.Count));
+				width = (doubleWidth + 1) / 2;
+				if (width == 0)
+					width = 1;
+				left = Vector2.Perpendicular(this.forward);
 
+				for (int i = 0; i < this.units.Count; i++)
+				{
+					Vector2 u = this.Position;
+					if (i % doubleWidth < width)
+						u += left * 3.0f * (i % doubleWidth - width / 2.0f) - this.forward * 3.0f * (i / doubleWidth) * 2;
+					else
+						u += left * 3.0f * (i % doubleWidth - width - (width -1)/ 2.0f) - this.forward * 3.0f * ((i / doubleWidth) * 2 + 1);
+
+					Vector2Int flu = Vector2Int.FloorToInt(u);
+					if (Terrain.instance.IsInTerrain(flu))
+					{
+						this.units[i].MoveTo(u, !isFirstMove);
+					}
+				}
 				break;
 			case FormationType.SEPERATED:
+				width = ((int)Mathf.Sqrt(ratio * this.units.Count)) / 2;
+				if (width == 0)
+					width = 1;
 
+				left = Vector2.Perpendicular(this.forward);
+
+				for (int i = 0; i < this.units.Count; i++)
+				{
+					if (i < this.units.Count / 2)
+					{
+						Vector2 u = this.Position - left * width * 1.5f + left * 1.2f * (i % width - width / 2) - this.forward * 1.2f * (i / width);
+						Vector2Int flu = Vector2Int.FloorToInt(u);
+						if (Terrain.instance.IsInTerrain(flu))
+						{
+							this.units[i].MoveTo(u, !isFirstMove);
+						}
+					}
+					else
+					{
+						Vector2 u = this.Position + left * width * 1.5f + left * 1.2f * ((i- this.units.Count / 2) % width - width / 2) - this.forward * 1.2f * ((i- this.units.Count / 2) / width);
+						Vector2Int flu = Vector2Int.FloorToInt(u);
+						if (Terrain.instance.IsInTerrain(flu))
+						{
+							this.units[i].MoveTo(u, !isFirstMove);
+						}
+					}
+				}
 				break;
 		}
 	}

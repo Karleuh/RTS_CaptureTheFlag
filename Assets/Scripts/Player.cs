@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
 	[SerializeField] 
 	Team team;
 	[SerializeField] UnitActionType unitAction;
+	[SerializeField] FormationType formationType;
 
 
 	[Header("UI")]
@@ -37,7 +38,8 @@ public class Player : MonoBehaviour
 	RectTransform orderPanel;
 	[SerializeField]
 	Canvas canvas;
-	
+	[SerializeField]
+	RectTransform formationPanel;
 
 	bool isMassSelecting;
 	Vector2 startMousePos;
@@ -154,6 +156,7 @@ public class Player : MonoBehaviour
 			this.currentFormation.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
 			this.currentFormation.gameObject.AddComponent<MeshRenderer>();
 			this.currentFormation.OnCreation(this.selectedUnits);
+			this.currentFormation.FormationType = this.formationType;
 
 			currentUnit = this.currentFormation;
 		}
@@ -194,6 +197,8 @@ public class Player : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
 			this.currentFormation = null;
+			this.formationPanel.gameObject.SetActive(false);
+
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
 				foreach(var circle in this.selectionCircles)
@@ -281,7 +286,8 @@ public class Player : MonoBehaviour
 				this.selectionSquare.gameObject.SetActive(false);
 				this.isMassSelecting = false;
 
-
+				if (this.selectedUnits.Count > 1)							// show formation panel
+					this.formationPanel.gameObject.SetActive(true);
 			}
 			else
 			{
@@ -357,7 +363,7 @@ public class Player : MonoBehaviour
 		return true;
 	}
 
-	public void OnButtonOrderClick(int unitActionType)
+	public void OnUnitActionSelectionButtonClick(int unitActionType)
 	{
 		this.unitAction = (UnitActionType)unitActionType;
 		for(int i=0; i<this.orderPanel.childCount; i++)
@@ -366,6 +372,21 @@ public class Player : MonoBehaviour
 
 			child.GetChild(0).GetChild(0).gameObject.SetActive(i == unitActionType - 1);
 		}
+	}
+
+
+	public void OnFormationSelectionButtonClick(int formationType)
+	{
+		this.formationType = (FormationType)formationType;
+		for (int i = 0; i < this.formationPanel.childCount; i++)
+		{
+			RectTransform child = this.formationPanel.GetChild(i) as RectTransform;
+
+			child.GetChild(0).GetChild(0).gameObject.SetActive(i == formationType);
+		}
+
+		if (this.currentFormation != null)
+			this.currentFormation.FormationType = this.formationType;
 	}
 
 }

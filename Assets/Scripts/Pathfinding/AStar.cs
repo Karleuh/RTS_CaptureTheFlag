@@ -173,7 +173,7 @@ public static class AStar
 		{
 			currentPoint += dir * 0.1f;
 			floorToInt = Vector2Int.FloorToInt(currentPoint);
-			if (Terrain.instance.getWalkWeight(floorToInt) != Terrain.instance.getWalkWeight(from))
+			if (Terrain.instance.getWalkWeight(floorToInt) > Terrain.instance.getWalkWeight(from))
 				return false;
 		}
 

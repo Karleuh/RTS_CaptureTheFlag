@@ -91,7 +91,7 @@ public abstract class Unit : MonoBehaviour
 		protected set => this.speed = value;
 	}
 
-
+	public bool IsWaitingForAction { get => this.unitActions.Count == 0; }
 
 
 	public bool IsMoving { get; protected set; }
