@@ -1,15 +1,22 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BasicUnit : Unit, IDamageable
 {
+	[Header("Health")]
+	[SerializeField]
+	float maxHealth = 100;
+
+	float health;
 
 	//List<Vector2Int> checkpoints = new List<Vector2Int>();
 	SimpleConcatLinkedList<Vector2Int> checkpoints = new SimpleConcatLinkedList<Vector2Int>();
 	Vector2 target;
 	float timeSinceFormationSpotInObstacle;
+	public bool IsDead => this.health <= 0;
 
-	public bool IsDead => false;
+
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
@@ -76,15 +83,19 @@ public class BasicUnit : Unit, IDamageable
 	protected override void Start()
     {
 		base.Start();
-    }
 
-    protected override void FixedUpdate()
+		this.health = maxHealth;
+	}
+
+	protected override void FixedUpdate()
     {
 
 		HandleMovement();
 
 		base.FixedUpdate();
     }
+
+
 
 	private void HandleMovement()
 	{
@@ -165,11 +176,15 @@ public class BasicUnit : Unit, IDamageable
 
 	public void Hit(float damagePoints)
 	{
-		throw new System.NotImplementedException();
+		this.health -= damagePoints;
+		if (this.health < 0)
+			this.health = 0;
 	}
 
 	public void Heal(float healingPoints)
 	{
-		throw new System.NotImplementedException();
+		this.health += healingPoints;
+		if (this.health > this.maxHealth)
+			this.health = this.maxHealth;
 	}
 }

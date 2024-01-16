@@ -12,6 +12,7 @@ public class Formation : Unit
 	Vector2 target;
 
 	bool waitForPosition;
+	bool areUnitsAttacking = false;
 
 	public FormationType FormationType { get; set; } = FormationType.LINE;
 
@@ -23,13 +24,23 @@ public class Formation : Unit
 		bool isSet = false;
 
 		this.Speed = float.MaxValue;
+		this.maxRange = 0;
 
 		foreach(Unit unit in units)
 		{
 			unit.Formation = this;
+			unit.StopAll();
 
 			if (unit.Speed < this.Speed)
 				this.Speed = unit.Speed;
+
+			if (unit.MinRange > this.MinRange)
+				this.minRange = unit.MinRange;
+			if (unit.MaxRange > this.maxRange)
+				this.maxRange = unit.MaxRange;
+			if (unit.LineOfSight > this.LineOfSight)
+				this.lineOfSight = unit.LineOfSight;
+
 			if (!isSet)
 			{
 				pos = unit.Position;
@@ -70,7 +81,6 @@ public class Formation : Unit
 
 	protected override void FixedUpdate()
 	{
-		base.FixedUpdate();
 
 		if (this.IsMoving && this.waitForPosition)
 		{
@@ -90,18 +100,29 @@ public class Formation : Unit
 		}
 
 
-		if (this.IsAttacking && this.IsTargetInRange())
+		if (this.IsAttacking && !this.areUnitsAttacking && this.IsTargetInRange())
+		{
+			this.areUnitsAttacking = true;
+			foreach (Unit u in this.units)
+			{
+				u.Attack(this.DamageableTarget);
+			}
+		}
+		
+		if(this.IsAttacking && this.DamageableTarget.IsDead)
 		{
 			GameObject.Destroy(this.gameObject);
 
 			foreach (Unit u in this.units)
 			{
 				u.LeaveFormationWithoutNotification();
-				AttackMoveAction action = new AttackMoveAction(u);
-				action.EnqueueAttack(this.DamageableTarget);
-				u.EnqueueAction(action, true);
+				//AttackMoveAction action = new AttackMoveAction(u);
+				//action.EnqueueAttack(this.DamageableTarget);
+				//u.EnqueueAction(action, true);
 			}
 		}
+
+		base.FixedUpdate();
 	}
 
 
@@ -142,6 +163,12 @@ public class Formation : Unit
 	}
 
 
+	public override void StopAttack()
+	{
+		base.StopAttack();
+		this.areUnitsAttacking = false;
+	}
+
 
 	public void DestroyFormation()
 	{
@@ -179,6 +206,8 @@ public class Formation : Unit
 
 				for (int i = 0; i < this.units.Count; i++)
 				{
+					if (isFirstMove)
+						this.units[i].StopAll();
 
 					Vector2 u = this.Position + left * 1.2f * (i % width - width / 2) - this.forward * 1.2f*(i/width);
 					Vector2Int flu = Vector2Int.FloorToInt(u);
@@ -200,6 +229,9 @@ public class Formation : Unit
 
 				for (int i = 0; i < this.units.Count; i++)
 				{
+					if (isFirstMove)
+						this.units[i].StopAll();
+
 					Vector2 u = this.Position;
 					if (i % doubleWidth < width)
 						u += left * 3.0f * (i % doubleWidth - width / 2.0f) - this.forward * 3.0f * (i / doubleWidth) * 2;
@@ -222,6 +254,9 @@ public class Formation : Unit
 
 				for (int i = 0; i < this.units.Count; i++)
 				{
+					if (isFirstMove)
+						this.units[i].StopAll();
+
 					if (i < this.units.Count / 2)
 					{
 						Vector2 u = this.Position - left * width * 1.5f + left * 1.2f * (i % width - width / 2) - this.forward * 1.2f * (i / width);

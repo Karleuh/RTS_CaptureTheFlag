@@ -95,7 +95,17 @@ public class Player : MonoBehaviour
 			}
 		}
 
+		if(Input.GetKeyDown(KeyCode.P))
+		{
+			var e = this.selectedUnits.GetEnumerator();
+			e.MoveNext();
+			RangeUnit range = e.Current as RangeUnit;
 
+			if(range != null)
+			{
+				range.Shoot();
+			}
+		}
 
 		Vector3 cammove = Vector3.zero;
 		if(Input.GetKey(KeyCode.Z))

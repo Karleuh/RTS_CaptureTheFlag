@@ -9,11 +9,11 @@ public abstract class Unit : MonoBehaviour
 	private const int RECALCULATE_PATH_COOLDOWN = 1;
 
 	[Header("Attack")]
-	[SerializeField] float minRange;
-	[SerializeField] float maxRange;
-	[SerializeField] float lineOfSight;
-	[SerializeField] float damage;
-	[SerializeField] float attackCooldown;
+	[SerializeField] protected float minRange;
+	[SerializeField] protected float maxRange;
+	[SerializeField] protected float lineOfSight;
+	[SerializeField] protected float damage;
+	[SerializeField] protected float attackCooldown;
 
 
 
@@ -141,13 +141,18 @@ public abstract class Unit : MonoBehaviour
 		return sqrdist > this.MinRange * this.MinRange && sqrdist < this.MaxRange * this.MaxRange;
 	}
 
-	public void StopAttack()
+	public virtual void StopAttack()
 	{
 		this.StopMovement();
 		this.IsAttacking = false;
 	}
 
 
+	public void StopAll()
+	{
+		this.StopMovement();
+		this.IsAttacking = false;
+	}
 
 
 	protected virtual void FixedUpdate()
