@@ -7,10 +7,14 @@ using UnityEditor;
 public class RangeViewer : Editor
 {
 	Unit unit;
+	Formation formation;
+	BasicUnit basicUnit;
 
 	private void OnEnable()
 	{
 		this.unit = this.target as Unit;
+		this.formation = this.target as Formation;
+		this.basicUnit = this.target as BasicUnit;
 	}
 
 	protected virtual void OnSceneGUI()
@@ -24,4 +28,19 @@ public class RangeViewer : Editor
 		Handles.color = Color.blue;
 		Handles.CircleHandleCap(0, this.unit.transform.position, Quaternion.LookRotation(Vector3.up), this.unit.LineOfSight, EventType.Repaint);
 	}
+
+	public override void OnInspectorGUI()
+	{
+		base.OnInspectorGUI();
+
+		if (formation != null && GUILayout.Button("Debug Path"))
+			this.formation.DebugPath();
+
+		if (basicUnit != null && GUILayout.Button("Debug Path"))
+			this.basicUnit.DebugPath();
+
+	}
 }
+
+
+

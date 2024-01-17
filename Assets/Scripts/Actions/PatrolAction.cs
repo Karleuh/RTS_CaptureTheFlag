@@ -40,7 +40,7 @@ class PatrolAction : UnitAction
 			{
 				this.nextTimeToCheckForUnits = Time.time + PatrolAction.CHECK_FOR_UNITS_INTERVAL;
 
-				this.targetDamageable = this.FindClosestUnitInLineOfSight();
+				this.targetDamageable = this.Unit.FindClosestUnitInLineOfSight();
 				if (this.targetDamageable != null)
 				{
 					this.isTargetingDamageable = true;
@@ -68,7 +68,7 @@ class PatrolAction : UnitAction
 			{
 				this.Unit.StopAttack();
 
-				IDamageable unit = this.FindClosestUnitInLineOfSight();
+				IDamageable unit = this.Unit.FindClosestUnitInLineOfSight();
 				if (unit != null && Utils.SqrDistance(this.positionLeavingPatrol, this.targetDamageable.Position) <= 4 * this.Unit.LineOfSight * this.Unit.LineOfSight)
 				{
 					this.isTargetingDamageable = true;
@@ -89,7 +89,7 @@ class PatrolAction : UnitAction
 				{
 					this.Unit.StopAttack();
 
-					IDamageable unit = this.FindClosestUnitInLineOfSight();
+					IDamageable unit = this.Unit.FindClosestUnitInLineOfSight();
 					if (unit != null && Utils.SqrDistance(this.positionLeavingPatrol, this.targetDamageable.Position) <= 4 * this.Unit.LineOfSight * this.Unit.LineOfSight)
 					{
 						this.isTargetingDamageable = true;
@@ -106,30 +106,6 @@ class PatrolAction : UnitAction
 	}
 
 
-	private IDamageable FindClosestUnitInLineOfSight()
-	{
-		IDamageable u = null;
-		List<IDamageable> units = UnitManager.OverlapCircleUnitDamageable(this.Unit.Position, this.Unit.LineOfSight, this.Unit.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
-		if (units.Count > 0)
-		{
-
-			//find closest unit
-			float minDistance = float.MaxValue;
-			for (int i = 0; i < units.Count; i++)
-			{
-				float dist = Utils.SqrDistance(units[i].Position, this.Unit.Position);
-				if (dist < minDistance)
-				{
-					minDistance = dist;
-					u = units[i];
-				}
-			}
-
-
-		}
-
-		return u;
-	}
 
 	public override bool EnqueueMove(Vector2 target)
 	{

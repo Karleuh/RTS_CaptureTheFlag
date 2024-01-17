@@ -18,11 +18,13 @@ public abstract class Unit : MonoBehaviour
 
 
 
+
+
 	[SerializeField]
 	[Range(0.1f, 10)]
 	private float speed;
 
-	[SerializeField] Team team;
+	[SerializeField] protected Team team;
 
 	private Formation _formation;
 
@@ -173,6 +175,7 @@ public abstract class Unit : MonoBehaviour
 		if (this.unitActions.Count > 0)
 			this.unitActions.Peek().FixedUpdate();
 
+
 		//attack
 		if(this.IsAttacking)
 			HandleAttack();
@@ -205,6 +208,8 @@ public abstract class Unit : MonoBehaviour
 		}
 	}
 
+
+
 	public bool EnqueueMove(Vector2 target)
 	{
 		if (this.unitActions.Count == 0)
@@ -231,6 +236,44 @@ public abstract class Unit : MonoBehaviour
 
 		this.unitActions.Enqueue(action);
 	}
+
+
+	public IDamageable FindClosestUnitInLineOfSight(bool random = false)
+	{
+		IDamageable u = null;
+		List<IDamageable> units = UnitManager.OverlapCircleUnitDamageable(this.Position, this.LineOfSight, this.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
+
+		if (units.Count > 0)
+		{
+			if (random)
+				return units[UnityEngine.Random.Range(0, units.Count)];
+
+			//find closest unit
+			float minDistance = float.MaxValue;
+			for (int i = 0; i < units.Count; i++)
+			{
+				float dist = Utils.SqrDistance(units[i].Position, this.Position);
+				if (dist < minDistance)
+				{
+					minDistance = dist;
+					u = units[i];
+				}
+			}
+
+
+		}
+
+		return u;
+	}
+}
+
+
+public enum Stance
+{
+	AGGRESSIVE,
+	DEFENSIVE,
+	STAND_GROUND,
+	NO_ATTACK
 }
 
 

@@ -42,9 +42,4 @@ public class CACUnit : BasicUnit
 		}
 	}
 
-	public override void StopAttack()
-	{
-		base.StopAttack();
-		this.attackAnimation.Stop();
-	}
 }

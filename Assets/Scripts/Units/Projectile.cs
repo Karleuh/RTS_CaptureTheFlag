@@ -54,10 +54,10 @@ public class Projectile : MonoBehaviour
 			{
 				Destroy(this.gameObject);
 				damageable.Hit(this.damage);
-				Debug.Log("HIT");
 				return;
 			}
 		}
+
 
 		//delete
 		if (this.transform.position.y <= 0)

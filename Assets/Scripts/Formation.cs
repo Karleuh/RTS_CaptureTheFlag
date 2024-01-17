@@ -43,6 +43,8 @@ public class Formation : Unit
 
 			if (!isSet)
 			{
+				this.team = unit.Team;
+
 				pos = unit.Position;
 				isSet = true;
 			}
@@ -53,6 +55,7 @@ public class Formation : Unit
 
 		this.Position = pos / this.units.Count;
 		this.transform.position = new Vector3(this.Position.x, 0, this.Position.y);
+
 
 		this.waitForPosition = true;
 	}
@@ -285,6 +288,19 @@ public class Formation : Unit
 	{
 		this.IsMoving = false;
 		this.checkpoints.Clear();
+	}
+
+
+	public void DebugPath()
+	{
+		foreach (var u in this.checkpoints)
+		{
+			GameObject go = new GameObject();
+			go.transform.position = new Vector3(u.x, 0, u.y);
+			go.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+			go.AddComponent<MeshFilter>().sharedMesh = Player.smesh;
+			go.AddComponent<MeshRenderer>();
+		}
 	}
 }
 

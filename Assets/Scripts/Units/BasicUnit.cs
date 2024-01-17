@@ -7,8 +7,15 @@ public class BasicUnit : Unit, IDamageable
 	[Header("Health")]
 	[SerializeField]
 	float maxHealth = 100;
+	[SerializeField] private Stance stance;
 
 	float health;
+	float lastTimeUnitsChecked;
+	private const int CHECK_FOR_UNITS_COOLDOWN = 1;
+	private const int MAXDISTANCE_DEFENSIVE_STAND = 10;
+
+	Vector2 defensivePosition;
+
 
 	//List<Vector2Int> checkpoints = new List<Vector2Int>();
 	SimpleConcatLinkedList<Vector2Int> checkpoints = new SimpleConcatLinkedList<Vector2Int>();
@@ -16,6 +23,15 @@ public class BasicUnit : Unit, IDamageable
 	float timeSinceFormationSpotInObstacle;
 	public bool IsDead => this.health <= 0;
 
+	public Stance Stance
+	{
+		get => this.stance;
+		set
+		{
+			this.stance = value;
+			this.StopAttack();
+		}
+	}
 
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
@@ -89,12 +105,96 @@ public class BasicUnit : Unit, IDamageable
 
 	protected override void FixedUpdate()
     {
+		if (this.IsDead)
+		{
+			Destroy(this.gameObject);
+			return;
+		}
+
+		if(this.IsWaitingForAction && (this.Formation == null || (!this.Formation.IsMoving && !this.IsAttacking)))
+			this.HandleStance();
 
 		HandleMovement();
 
 		base.FixedUpdate();
     }
 
+
+
+
+	private void HandleStance()
+	{
+		switch (this.Stance)
+		{
+			case Stance.AGGRESSIVE:
+				if (!this.IsAttacking)
+				{
+					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
+					{
+						IDamageable target = this.FindClosestUnitInLineOfSight();
+
+						if (target != null)
+							this.Attack(target);
+					}
+				}
+				break;
+			case Stance.DEFENSIVE:
+				if (!this.IsAttacking && !this.IsMoving)
+				{
+					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
+					{
+						IDamageable target = this.FindClosestUnitInLineOfSight();
+
+						if (target != null)
+						{
+							this.Attack(target);
+							this.defensivePosition = this.Position;
+						}
+					}
+				}
+				else
+				{
+					if(this.DamageableTarget.IsDead || Utils.SqrDistance(this.Position, this.defensivePosition) > BasicUnit.MAXDISTANCE_DEFENSIVE_STAND * BasicUnit.MAXDISTANCE_DEFENSIVE_STAND)
+					{
+						List<IDamageable> damageables = UnitManager.OverlapCircleUnitDamageable(this.Position, this.lineOfSight, this.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
+						IDamageable minTarget = null;
+						float minDistance = float.PositiveInfinity;
+						foreach(IDamageable d in damageables)
+						{
+							float dist = Utils.SqrDistance(d.Position, this.Position);
+							if(dist < minDistance && Utils.SqrDistance(this.defensivePosition, d.Position) < BasicUnit.MAXDISTANCE_DEFENSIVE_STAND * BasicUnit.MAXDISTANCE_DEFENSIVE_STAND)
+							{
+								minTarget = d;
+								minDistance = dist;
+							}
+						}
+
+						if (minTarget != null)
+							this.Attack(minTarget);
+						else
+						{
+							this.StopAttack();
+							this.MoveTo(this.defensivePosition);
+						}
+					}
+				}
+				break;
+			case Stance.STAND_GROUND:
+				if (!this.IsAttacking)
+				{
+					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
+					{
+						IDamageable target = this.FindClosestUnitInLineOfSight();
+
+						if (target != null && Utils.SqrDistance(this.Position, target.Position) < this.MaxRange * this.MaxRange)
+							this.Attack(target);
+					}
+				}
+				break;
+			case Stance.NO_ATTACK:
+				break;
+		}
+	}
 
 
 	private void HandleMovement()

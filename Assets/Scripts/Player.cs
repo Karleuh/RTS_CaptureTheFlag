@@ -213,7 +213,8 @@ public class Player : MonoBehaviour
 			{
 				foreach(var circle in this.selectionCircles)
 				{
-					circle.SetActive(false);
+					if(circle != null)
+						circle.SetActive(false);
 				}
 				this.selectedUnits.Clear();
 			}
@@ -277,9 +278,14 @@ public class Player : MonoBehaviour
 									if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
 									{
 										circle = this.selectionCircles[this.selectedUnits.Count - 1];
-										circle.transform.SetParent(unit.transform);
-										circle.transform.localPosition = new Vector3(0, 0.2f, 0);
-										circle.SetActive(true);
+										if (circle == null)
+											circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
+										else
+										{
+											circle.transform.SetParent(unit.transform);
+											circle.transform.localPosition = new Vector3(0, 0.2f, 0);
+											circle.SetActive(true);
+										}
 									}
 									else
 									{
@@ -313,9 +319,14 @@ public class Player : MonoBehaviour
 						if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
 						{
 							circle = this.selectionCircles[this.selectedUnits.Count - 1];
-							circle.transform.SetParent(unit.transform);
-							circle.transform.localPosition = new Vector3(0, 0.2f, 0);
-							circle.SetActive(true);
+							if (circle == null)
+								circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
+							else
+							{
+								circle.transform.SetParent(unit.transform);
+								circle.transform.localPosition = new Vector3(0, 0.2f, 0);
+								circle.SetActive(true);
+							}
 						}
 						else
 						{
