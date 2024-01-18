@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36997f0b859cf4f408ae80be8be41fb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  virtualTarget: {fileID: 207451578676931074, guid: 7cb83da2136c1274aaf8c0191fe63bb0, type: 3}
-  arenaSize: 100
+  virtualTarget: {fileID: 0}
+  arenaSize: 0

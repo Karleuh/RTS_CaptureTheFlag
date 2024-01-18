@@ -175,8 +175,6 @@ MonoBehaviour:
   direction: {x: 0, y: 0, z: 0}
   speed: 10
   minRange: 2
-  nextTargetRange: 10
-  virtualTargetGO: {fileID: 207451578676931074, guid: 7cb83da2136c1274aaf8c0191fe63bb0, type: 3}
 --- !u!1001 &845368117722621016
 PrefabInstance:
   m_ObjectHideFlags: 0
