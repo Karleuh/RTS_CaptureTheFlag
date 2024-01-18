@@ -11,10 +11,11 @@ public class GobMovementBehavior : MonoBehaviour
     private Transform mainTarget;
     private Transform virtualTarget;
     private bool isMovingTowardMainTarget;
+    private bool canSpawn = true;
 
     [SerializeField] private float minRange;
-    
-
+    [SerializeField] private float nextTargetRange;
+    [SerializeField] private GameObject virtualTargetGO;
 
     void Start()
     {
@@ -37,8 +38,16 @@ public class GobMovementBehavior : MonoBehaviour
         else 
         {
             isMovingTowardMainTarget = false;
-            virtualTarget = FOVScript.virtualTarget;
-            if (!(virtualTarget==null))
+
+            if (virtualTarget ==null)
+            {
+                virtualTarget = FOVScript.virtualTarget;
+                if (virtualTarget ==null)
+                {
+                    StartCoroutine("SpawnVirtualTarget");
+                }
+            }
+            else
             {
                 LookTowards(virtualTarget);
                 MoveTowards(virtualTarget);
@@ -63,8 +72,32 @@ public class GobMovementBehavior : MonoBehaviour
 
     void LookTowards(Transform currentTarget)
     {
+        float distance = direction.magnitude;
+
+        if (distance > minRange)
+            {
         //AJOUTER ICI ANIMATION DE OMG JLAI REPERER
-        transform.LookAt(currentTarget);
+                StartCoroutine("Wait1SecAndLookTowards", currentTarget);
+            }
     }
 
+    IEnumerator SpawnVirtualTarget()
+    {
+        if (canSpawn)
+        {
+            canSpawn = false;
+            Vector3 SomeWhereInTheFront = transform.forward*Random.Range(0, nextTargetRange) + transform.right*Random.Range(-nextTargetRange/2, nextTargetRange/2);
+            Vector3 positionNextTarget = transform.position + SomeWhereInTheFront;
+            GameObject newVirtualTarget = Instantiate(virtualTargetGO, positionNextTarget, Quaternion.identity);
+            yield return new WaitForSeconds(3.0f);
+            canSpawn = true;
+        }
+        
+    }
+
+    IEnumerator Wait1SecAndLookTowards(Transform currentTarget)
+    {
+        yield return new WaitForSeconds(1.0f);
+        transform.LookAt(currentTarget);
+    }
 }

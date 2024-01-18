@@ -91,7 +91,7 @@ public class Terrain : MonoBehaviour
 	{
 		Debug.Log("=================== Generation =======================");
 		if(this.seed == 0)
-			 this.seed = (long)(Random.value * long.MaxValue);
+			this.seed = (long)(Random.value * long.MaxValue);
 		OpenSimplexNoise noise = new OpenSimplexNoise(this.seed);
 		Debug.Log("Seed : " + this.seed);
 

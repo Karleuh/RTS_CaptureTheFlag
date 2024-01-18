@@ -58,4 +58,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c06f0acde0f12544caba346723fc5bd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selfDestructDelay: 10
+  selfDestructDelay: 3
