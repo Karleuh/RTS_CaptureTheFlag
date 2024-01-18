@@ -271,7 +271,7 @@ public class Player : MonoBehaviour
 						{
 							foreach (var unit in units)
 							{
-								if (unit.Team == this.team && unit.Position.x > minX && unit.Position.x < maxX && unit.Position.y > minY && unit.Position.y < maxY)
+								if (unit.gameObject != null && unit.Team == this.team && unit.Position.x > minX && unit.Position.x < maxX && unit.Position.y > minY && unit.Position.y < maxY)
 								{
 									this.selectedUnits.Add(unit);
 									GameObject circle = null;
