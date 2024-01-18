@@ -122,10 +122,16 @@ public class FieldOfView : MonoBehaviour
             //Targets dans le cone de vision
             if (Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2)
             {
-                //RayCast pour s'assurer que la target n'est pas derri�re un obstacle
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
+                //Utilisation d'astar.IsLineWalkable pcq ff les raycasts
 
-                if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstacleMask))
+                Vector2Int myPos = new Vector2Int();
+                myPos.x = Mathf.FloorToInt(transform.position.x);
+                myPos.y = Mathf.FloorToInt(transform.position.z);
+                Vector2Int targetPos = new Vector2Int();
+                targetPos.x = Mathf.FloorToInt(target.position.x);
+                targetPos.y = Mathf.FloorToInt(target.position.z);
+
+                if (AStar.IsLineWalkable(myPos, targetPos))
                 {
                     _visibleTargets.Add(target);
                 }
@@ -150,6 +156,4 @@ public class FieldOfView : MonoBehaviour
     {
         return new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), 0, Mathf.Cos(angle * Mathf.Deg2Rad));
     }
-
-
 }
