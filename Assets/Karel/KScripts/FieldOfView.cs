@@ -64,13 +64,6 @@ public class FieldOfView : MonoBehaviour
 
     void Update()
     {
-        //pas besoin d'update visuel (�a a l'air louche pcq le mesh est cr�e localement depuis le gameobject auquel ce script est attach� et bouge tout seul)
-        //vertices[0] = new Vector3(0,0,0);
-        //vertices[1] = DirFromAngle(viewAngle / 2) * viewRadius;
-        //vertices[2] = DirFromAngle(-viewAngle / 2) * viewRadius;
-
-        //mesh.vertices = vertices;
-
         //Find virtual target commence quand il n'y a pas de main target, et s'arrete dès qu'une main target est trouvée
         if (visibleTargets.Count > 0)
         {
@@ -83,7 +76,6 @@ public class FieldOfView : MonoBehaviour
             virtualTarget = FindCurrentTarget(virtualTargets);
             StartCoroutine("FindVirtualTargetWithDelay", FOVRefreshDelay);
         }
-
     }
 
 
