@@ -8,11 +8,13 @@ public class BasicUnit : Unit, IDamageable
 	[SerializeField]
 	float maxHealth = 100;
 	[SerializeField] private Stance stance;
+	[SerializeField] HealthBar healthBar;
 
 	float health;
 	float lastTimeUnitsChecked;
 	private const int CHECK_FOR_UNITS_COOLDOWN = 1;
 	private const int MAXDISTANCE_DEFENSIVE_STAND = 10;
+
 
 	Vector2 defensivePosition;
 
@@ -279,6 +281,7 @@ public class BasicUnit : Unit, IDamageable
 		this.health -= damagePoints;
 		if (this.health < 0)
 			this.health = 0;
+		this.healthBar.SetAmount(this.health / this.maxHealth);
 	}
 
 	public void Heal(float healingPoints)
@@ -286,5 +289,6 @@ public class BasicUnit : Unit, IDamageable
 		this.health += healingPoints;
 		if (this.health > this.maxHealth)
 			this.health = this.maxHealth;
+		this.healthBar.SetAmount(this.health / this.maxHealth);
 	}
 }

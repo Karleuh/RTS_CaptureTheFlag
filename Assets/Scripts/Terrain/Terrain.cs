@@ -45,6 +45,10 @@ public class Terrain : MonoBehaviour
 	[SerializeField]
 	MeshFilter leavesMeshFilter;
 
+
+	[SerializeField]
+	long seed = 0;
+
 	int width = 100;
 	int height = 100;
 
@@ -86,9 +90,10 @@ public class Terrain : MonoBehaviour
 	public void Generate()
 	{
 		Debug.Log("=================== Generation =======================");
-		long seed = (long)(Random.value * long.MaxValue);
-		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
-		Debug.Log("Seed : " + seed);
+		if(this.seed == 0)
+			 this.seed = (long)(Random.value * long.MaxValue);
+		OpenSimplexNoise noise = new OpenSimplexNoise(this.seed);
+		Debug.Log("Seed : " + this.seed);
 
 		List<Vector3> forestVertices = new List<Vector3>();
 		List<int> forestIndices = new List<int>();

@@ -28,6 +28,9 @@ public class Formation : Unit
 
 		foreach(Unit unit in units)
 		{
+			if (unit == null || unit.gameObject == null)
+				continue;
+
 			unit.Formation = this;
 			unit.StopAll();
 
