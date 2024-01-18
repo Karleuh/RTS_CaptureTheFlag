@@ -10,6 +10,9 @@ public class BasicUnit : Unit, IDamageable
 	[SerializeField] private Stance stance;
 	[SerializeField] HealthBar healthBar;
 
+	[SerializeField] private GameObject hitAudio;
+	[SerializeField] private GameObject deathAudio;
+
 	float health;
 	float lastTimeUnitsChecked;
 	private const int CHECK_FOR_UNITS_COOLDOWN = 1;
@@ -109,6 +112,11 @@ public class BasicUnit : Unit, IDamageable
     {
 		if (this.IsDead)
 		{
+			//Audio dead
+
+			GameObject _deathAudio = Instantiate(deathAudio, transform.position, Quaternion.identity);
+	
+
 			Destroy(this.gameObject);
 			return;
 		}
@@ -282,6 +290,12 @@ public class BasicUnit : Unit, IDamageable
 		if (this.health < 0)
 			this.health = 0;
 		this.healthBar.SetAmount(this.health / this.maxHealth);
+
+		//Audio hit
+		
+		GameObject _hitAudio = Instantiate(hitAudio, transform.position, Quaternion.identity);
+		_hitAudio.transform.parent = transform;
+
 	}
 
 	public void Heal(float healingPoints)

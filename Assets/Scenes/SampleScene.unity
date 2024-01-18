@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -660,7 +660,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &106080322
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4445,7 +4445,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5169,6 +5169,8 @@ MonoBehaviour:
   maxHealth: 100
   stance: 3
   healthBar: {fileID: 1431921096}
+  hitAudio: {fileID: 7130147963999819890, guid: 158b9fc49a0378c4eb53304a42c27803, type: 3}
+  deathAudio: {fileID: 1979891194675351579, guid: 3a037f6967100ea4f9afa032de382d7b, type: 3}
   attackAnimation: {fileID: 886135881}
   delayToAttack: 0
   projectile: {fileID: 2533528842432448292, guid: ade0282820baa894bbcf6e4c040dd9b7, type: 3}
@@ -6480,7 +6482,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -6766,7 +6768,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -7988,8 +7990,10 @@ MonoBehaviour:
   speed: 5
   team: 2
   maxHealth: 10000
-  stance: 3
+  stance: 0
   healthBar: {fileID: 1962896823}
+  hitAudio: {fileID: 7130147963999819890, guid: 158b9fc49a0378c4eb53304a42c27803, type: 3}
+  deathAudio: {fileID: 1979891194675351579, guid: 3a037f6967100ea4f9afa032de382d7b, type: 3}
   attackAnimation: {fileID: 1466212665}
   delayToAttack: 0.36666667
 --- !u!4 &1466212668
@@ -9989,7 +9993,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -10451,6 +10455,8 @@ MonoBehaviour:
   maxHealth: 100
   stance: 0
   healthBar: {fileID: 1399265053}
+  hitAudio: {fileID: 7130147963999819890, guid: 158b9fc49a0378c4eb53304a42c27803, type: 3}
+  deathAudio: {fileID: 1979891194675351579, guid: 3a037f6967100ea4f9afa032de382d7b, type: 3}
   attackAnimation: {fileID: 1846270275}
   delayToAttack: 0.36666667
 --- !u!1 &1870982011
@@ -11421,7 +11427,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -11573,7 +11579,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
