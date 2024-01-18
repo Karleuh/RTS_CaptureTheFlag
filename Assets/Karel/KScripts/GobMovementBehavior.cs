@@ -13,9 +13,8 @@ public class GobMovementBehavior : MonoBehaviour
     private bool isMovingTowardMainTarget;
 
     [SerializeField] private float minRange;
-    
-
-
+    [SerializeField] private float nextTargetRange;
+    [SerializeField] private GameObject virtualTargetGO;
     void Start()
     {
         FOVScript = transform.GetChild(1).GetComponent<FieldOfView>();
@@ -43,6 +42,12 @@ public class GobMovementBehavior : MonoBehaviour
                 LookTowards(virtualTarget);
                 MoveTowards(virtualTarget);
             }
+            else
+            {
+                //Spawn d'une virtual target
+                Vector3 positionNextTarget = transform.position + new Vector3(Random.Range(-nextTargetRange, nextTargetRange),0,Random.Range(-nextTargetRange, nextTargetRange));
+                SpawnVirtualTarget(positionNextTarget);
+            }
         }
     }
 
@@ -67,4 +72,10 @@ public class GobMovementBehavior : MonoBehaviour
         transform.LookAt(currentTarget);
     }
 
+    void SpawnVirtualTarget(Vector3 position)
+    {
+        GameObject newVirtualTarget = Instantiate(virtualTargetGO, position, Quaternion.identity);
+        newVirtualTarget.transform.parent = gameObject.transform;
+        
+    }
 }
