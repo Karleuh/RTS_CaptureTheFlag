@@ -5,9 +5,8 @@ using UnityEngine;
 
 public class CACUnit : BasicUnit
 {
-	[Header("Animation")]
 	[SerializeField]
-	Animation attackAnimation;
+	String attackAnimation;
 	[SerializeField]
 	float delayToAttack;
 
@@ -25,14 +24,13 @@ public class CACUnit : BasicUnit
 
 	private void PerformAttack()
 	{
-
 		if (Time.time > this.timeAttackWasPerformed + this.AttackCooldown)
 		{
 			Vector2 forward = (this.DamageableTarget.Position - this.Position).normalized;
 			this.transform.forward = new Vector3(forward.x, 0, forward.y);
 
 			this.timeAttackWasPerformed = Time.time;
-			this.attackAnimation.Play();
+			this.anim.Play(this.attackAnimation);
 			this.hit = false;
 		}
 		else if(!hit && Time.time > this.timeAttackWasPerformed + delayToAttack)

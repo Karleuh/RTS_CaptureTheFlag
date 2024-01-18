@@ -6,8 +6,14 @@ using UnityEngine.UI;
 
 public class Menu : MonoBehaviour
 {
+	[SerializeField] Player player;
+	[SerializeField] GameObject panel;
 	[SerializeField] GameObject mainMenu;
 	[SerializeField] GameObject optionsMenu;
+	[SerializeField] GameObject rulesMenu;
+	[SerializeField] GameObject popupWin;
+	[SerializeField] TMPro.TMP_Text winText;
+	[SerializeField] TMPro.TMP_Text timeText;
 	[SerializeField] TMPro.TMP_Dropdown resolutionsDropdown;
 	[SerializeField] TMPro.TMP_Dropdown qualitiesDropdown;
 	[SerializeField] Slider masterSlider;
@@ -18,8 +24,22 @@ public class Menu : MonoBehaviour
 	Resolution[] resolutions;
 
 
+	public bool Shown
+	{
+		set
+		{
+			this.panel.SetActive(value);
+			this.mainMenu.SetActive(value);
+			this.optionsMenu.SetActive(false);
+			this.rulesMenu.SetActive(false);
+
+			this.popupWin.SetActive(false);
+		}
+	}
+
 	void Start()
     {
+		this.Shown = true;
 		this.SetupResolutions();
 		this.SetupQualities();
 		this.SetupVolumes();
@@ -68,19 +88,36 @@ public class Menu : MonoBehaviour
 
 	void Update()
     {
-        
+		this.timeText.text = Mathf.Floor(GameManager.Instance.GameTime) + "s";
     }
+
 
 	public void OnOptionsBC()
 	{
 		this.mainMenu.SetActive(false);
 		this.optionsMenu.SetActive(true);
+		this.rulesMenu.SetActive(false);
 	}
 
 	public void OnMainMenuBC()
 	{
 		this.mainMenu.SetActive(true);
 		this.optionsMenu.SetActive(false);
+		this.rulesMenu.SetActive(false);
+	}
+
+	public void OnRulesMenuBC()
+	{
+		this.mainMenu.SetActive(false);
+		this.optionsMenu.SetActive(false);
+		this.rulesMenu.SetActive(true);
+	}
+
+
+	public void OnPlay()
+	{
+		this.Shown = false;
+		GameManager.Instance.StartGame();
 	}
 
 	public void OnMainVolumeChanged(float value)
@@ -107,5 +144,21 @@ public class Menu : MonoBehaviour
 	public void OnQualityChanged(int value)
 	{
 		QualitySettings.SetQualityLevel(value, true);
+	}
+
+
+	public void OnTeamChanged(int value)
+	{
+		this.player.Team = value == 0 ? Team.ATTACKER : Team.DEFENDER;
+	}
+
+
+
+
+
+	public void OnWin(bool win)
+	{
+		this.popupWin.SetActive(true);
+		this.winText.text = win ? "Bravo\nVous avez gagné !" : "Oh non !\nVous avez perdu !";
 	}
 }

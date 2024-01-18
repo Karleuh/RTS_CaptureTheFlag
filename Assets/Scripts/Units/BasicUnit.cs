@@ -4,18 +4,29 @@ using UnityEngine;
 
 public class BasicUnit : Unit, IDamageable
 {
+	[SerializeField] private Stance stance;
+
 	[Header("Health")]
 	[SerializeField]
 	float maxHealth = 100;
-	[SerializeField] private Stance stance;
 	[SerializeField] HealthBar healthBar;
 
-	[SerializeField] private GameObject hitAudio;
-	[SerializeField] private GameObject deathAudio;
+	[Header("Audio")]
+	[SerializeField] private AudioClip hitAudio;
+	[SerializeField] private AudioClip deathAudio;
+	[SerializeField] private AudioSource audioSource;
+
+	[Header("Animation")]
+	[SerializeField] protected Animation anim;
+	[SerializeField] String dieAnimation;
+
 
 	float health;
 	float lastTimeUnitsChecked;
+	float timeDie;
+
 	private const int CHECK_FOR_UNITS_COOLDOWN = 1;
+	private const float DIE_COOLDOWN = 1.5f;
 	private const int MAXDISTANCE_DEFENSIVE_STAND = 10;
 
 
@@ -112,14 +123,11 @@ public class BasicUnit : Unit, IDamageable
     {
 		if (this.IsDead)
 		{
-			//Audio dead
-
-			GameObject _deathAudio = Instantiate(deathAudio, transform.position, Quaternion.identity);
-	
-
-			Destroy(this.gameObject);
+			if(Time.time > this.timeDie + BasicUnit.DIE_COOLDOWN)
+				Destroy(this.gameObject);
 			return;
 		}
+
 
 		if(this.IsWaitingForAction && (this.Formation == null || (!this.Formation.IsMoving && !this.IsAttacking)))
 			this.HandleStance();
@@ -288,13 +296,20 @@ public class BasicUnit : Unit, IDamageable
 	{
 		this.health -= damagePoints;
 		if (this.health < 0)
+		{
 			this.health = 0;
+			this.audioSource.PlayOneShot(this.deathAudio);
+			this.anim.Play(this.dieAnimation);
+			this.timeDie = Time.time;
+			this.healthBar.SetAmount(0);
+
+			return;
+		}
 		this.healthBar.SetAmount(this.health / this.maxHealth);
 
 		//Audio hit
-		
-		GameObject _hitAudio = Instantiate(hitAudio, transform.position, Quaternion.identity);
-		_hitAudio.transform.parent = transform;
+
+		this.audioSource.PlayOneShot(this.hitAudio);
 
 	}
 

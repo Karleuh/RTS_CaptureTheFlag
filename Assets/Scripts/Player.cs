@@ -41,6 +41,9 @@ public class Player : MonoBehaviour
 	[SerializeField]
 	RectTransform formationPanel;
 
+
+	public Team Team { get => this.team; set => this.team = value; }
+
 	bool isMassSelecting;
 	Vector2 startMousePos;
 
