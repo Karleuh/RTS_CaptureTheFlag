@@ -8,8 +8,6 @@ public class Player : MonoBehaviour
 {
 	[Header("Camera")]
 	[SerializeField]
-	float terrainHeight;
-	[SerializeField]
 	Camera cam;
 	[SerializeField]
 	float camSpeed;
@@ -27,8 +25,6 @@ public class Player : MonoBehaviour
 	GameObject selectionCirclePrefab;
 
 	[Header("Gameplay")]
-	[SerializeField] 
-	Team team;
 	[SerializeField] UnitActionType unitAction;
 	[SerializeField] FormationType formationType;
 
@@ -42,7 +38,6 @@ public class Player : MonoBehaviour
 	RectTransform formationPanel;
 
 
-	public Team Team { get => this.team; set => this.team = value; }
 
 	bool isMassSelecting;
 	Vector2 startMousePos;
@@ -144,7 +139,7 @@ public class Player : MonoBehaviour
 
 	private void HandleAction()
 	{
-		Vector2 targetPos = this.GetPosFromScreenPoint(Input.mousePosition);
+		Vector2 targetPos = GameManager.Instance.GetPosFromScreenPoint(Input.mousePosition);
 		IDamageable targetUnit = null;
 
 		//find if we attack a unit
@@ -159,7 +154,7 @@ public class Player : MonoBehaviour
 
 		Unit currentUnit = null;
 
-		if(this.currentFormation != null)
+		if(this.currentFormation != null && this.currentFormation.gameObject != null)
 		{
 			currentUnit = currentFormation;
 		}
@@ -253,10 +248,11 @@ public class Player : MonoBehaviour
 			if (this.isMassSelecting)
 			{
 				//TODO fix selection
-				Vector2 tl = this.GetPosFromScreenPoint(this.startMousePos);
-				Vector2 br = this.GetPosFromScreenPoint(Input.mousePosition);
-				Vector2 tr = this.GetPosFromScreenPoint(new Vector3(Input.mousePosition.x, this.startMousePos.y));
-				Vector2 bl = this.GetPosFromScreenPoint(new Vector3(this.startMousePos.x, Input.mousePosition.y));
+				Vector2 tl = GameManager.Instance.GetPosFromScreenPoint(this.startMousePos);
+				Vector2 br = GameManager.Instance.GetPosFromScreenPoint(Input.mousePosition);
+				Vector2 tr = GameManager.Instance.GetPosFromScreenPoint(new Vector3(Input.mousePosition.x, this.startMousePos.y));
+				Vector2 bl = GameManager.Instance.GetPosFromScreenPoint(new Vector3(this.startMousePos.x, Input.mousePosition.y));
+
 
 				int minX = (int)Mathf.Min(tl.x, br.x		, tr.x, bl.x);
 				int maxX = (int)Mathf.Max(tl.x, br.x		, tr.x, bl.x);
@@ -274,7 +270,12 @@ public class Player : MonoBehaviour
 						{
 							foreach (var unit in units)
 							{
-								if (unit.gameObject != null && unit.Team == this.team && unit.Position.x > minX && unit.Position.x < maxX && unit.Position.y > minY && unit.Position.y < maxY)
+								if (unit != null && unit.gameObject != null && unit.IsSelectable && unit.Team == GameManager.Instance.PlayerTeam
+									&& Vector2.Dot(Vector2.Perpendicular(tl - bl), unit.Position - bl) < 0
+									&& Vector2.Dot(Vector2.Perpendicular(tr - tl), unit.Position - tl) < 0
+									&& Vector2.Dot(Vector2.Perpendicular(br - tr), unit.Position - br) < 0
+									&& Vector2.Dot(Vector2.Perpendicular(bl - br), unit.Position - br) < 0
+									)
 								{
 									this.selectedUnits.Add(unit);
 									GameObject circle = null;
@@ -314,7 +315,7 @@ public class Player : MonoBehaviour
 				if (Physics.Raycast(r, out RaycastHit info, 100.0f, this.selectableLayer))
 				{
 					Unit unit = info.collider.GetComponentInParent<Unit>();
-					if (unit != null && unit.Team == this.team)
+					if (unit != null && unit.Team == GameManager.Instance.PlayerTeam)
 					{
 						this.selectedUnits.Add(unit);
 
@@ -343,22 +344,12 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private Vector2 GetPosFromScreenPoint(Vector3 mousePos)
-	{
-		//line equation to have O(1)
-		Ray r = this.cam.ScreenPointToRay(mousePos);
-		float t = (this.terrainHeight - r.origin.y) / (r.direction.y);
-
-		Vector3 collidePoint = r.origin + t * r.direction;
-
-		return  new Vector2(collidePoint.x, collidePoint.z);
-	}
 
 
 
 	private Unit GetUnitFromMouse()
 	{
-		Vector2 p = this.GetPosFromScreenPoint(Input.mousePosition);
+		Vector2 p = GameManager.Instance.GetPosFromScreenPoint(Input.mousePosition);
 
 		IReadOnlyCollection<Unit> units = UnitManager.GetUnitsInChunk(new ChunkPos(p, UnitManager.chunckSize));
 

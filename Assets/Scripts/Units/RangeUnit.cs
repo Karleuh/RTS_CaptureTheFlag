@@ -7,7 +7,7 @@ public class RangeUnit : BasicUnit
 {
 	[Header("Animation")]
 	[SerializeField]
-	Animation attackAnimation;
+	string attackAnimation;
 	[SerializeField]
 	float delayToAttack;
 	[SerializeField]
@@ -37,7 +37,8 @@ public class RangeUnit : BasicUnit
 			this.transform.forward = new Vector3(forward.x, 0, forward.y);
 
 			this.timeAttackWasPerformed = Time.time;
-			this.attackAnimation.Play();
+			if(!String.IsNullOrEmpty(this.attackAnimation))
+				this.anim.Play(this.attackAnimation);
 			this.hit = false;
 		}
 		if (!hit && Time.time > this.timeAttackWasPerformed + delayToAttack)

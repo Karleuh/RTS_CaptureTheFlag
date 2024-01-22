@@ -1,11 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+public enum DamageType
+{
+	DIRECT,
+	MELEE,
+	PIERCE
+}
 
 public interface IDamageable 
 {
-	void Hit(float damagePoints);
-	void Heal(float healingPoints);
+	void Hit(DamageType damageType, int damagePoints);
+	void Heal(int healingPoints);
 	bool IsDead { get; }
 	Team Team { get; }
 	Vector2 Position { get; }

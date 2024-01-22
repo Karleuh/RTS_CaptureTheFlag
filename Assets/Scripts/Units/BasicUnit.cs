@@ -8,7 +8,11 @@ public class BasicUnit : Unit, IDamageable
 
 	[Header("Health")]
 	[SerializeField]
-	float maxHealth = 100;
+	int maxHealth = 100;
+	[SerializeField]
+	int pierceArmor = 0;
+	[SerializeField]
+	int meleeArmor = 0;
 	[SerializeField] HealthBar healthBar;
 
 	[Header("Audio")]
@@ -21,7 +25,7 @@ public class BasicUnit : Unit, IDamageable
 	[SerializeField] String dieAnimation;
 
 
-	float health;
+	int health;
 	float lastTimeUnitsChecked;
 	float timeDie;
 
@@ -49,6 +53,7 @@ public class BasicUnit : Unit, IDamageable
 		}
 	}
 
+	public override bool IsSelectable => !this.IsDead;
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
@@ -292,9 +297,9 @@ public class BasicUnit : Unit, IDamageable
 		}
 	}
 
-	public void Hit(float damagePoints)
+	public void Hit(DamageType damageType, int damagePoints)
 	{
-		this.health -= damagePoints;
+		this.health -= (damagePoints - (damageType == DamageType.MELEE ? this.meleeArmor : damageType == DamageType.PIERCE ? this.pierceArmor : 0));
 		if (this.health < 0)
 		{
 			this.health = 0;
@@ -302,7 +307,8 @@ public class BasicUnit : Unit, IDamageable
 			this.anim.Play(this.dieAnimation);
 			this.timeDie = Time.time;
 			this.healthBar.SetAmount(0);
-
+			this.Formation = null;
+			GameManager.Instance.OnUnitDead(this.Team);
 			return;
 		}
 		this.healthBar.SetAmount(this.health / this.maxHealth);
@@ -313,7 +319,7 @@ public class BasicUnit : Unit, IDamageable
 
 	}
 
-	public void Heal(float healingPoints)
+	public void Heal(int healingPoints)
 	{
 		this.health += healingPoints;
 		if (this.health > this.maxHealth)

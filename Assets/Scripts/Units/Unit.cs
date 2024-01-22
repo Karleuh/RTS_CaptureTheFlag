@@ -12,7 +12,7 @@ public abstract class Unit : MonoBehaviour
 	[SerializeField] protected float minRange;
 	[SerializeField] protected float maxRange;
 	[SerializeField] protected float lineOfSight;
-	[SerializeField] protected float damage;
+	[SerializeField] protected int damage;
 	[SerializeField] protected float attackCooldown;
 
 
@@ -51,7 +51,7 @@ public abstract class Unit : MonoBehaviour
 
 	}
 
-	public float Damage
+	public int Damage
 	{
 		get => this.damage;
 	}
@@ -114,6 +114,8 @@ public abstract class Unit : MonoBehaviour
 
 	public Team Team { get => this.team; private set => this.team = value; }
 
+	public virtual bool IsSelectable { get; }
+
 
 	protected virtual void Start()
 	{
@@ -156,7 +158,6 @@ public abstract class Unit : MonoBehaviour
 		this.IsAttacking = false;
 	}
 
-
 	protected virtual void FixedUpdate()
 	{
 		//position
@@ -183,7 +184,7 @@ public abstract class Unit : MonoBehaviour
 
 	private void HandleAttack()
 	{
-		if (this.DamageableTarget.IsDead)
+		if (this.DamageableTarget == null || this.DamageableTarget.IsDead)
 			this.StopAttack();
 		else if(Utils.SqrDistance(this.Position, DamageableTarget.Position) > this.MaxRange * this.MaxRange)
 		{

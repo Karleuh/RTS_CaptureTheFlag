@@ -88,7 +88,8 @@ public class Menu : MonoBehaviour
 
 	void Update()
     {
-		this.timeText.text = Mathf.Floor(GameManager.Instance.GameTime) + "s";
+		if(GameManager.Instance.IsGameStarted)
+			this.timeText.text = Mathf.Floor(GameManager.Instance.GameTime) + "s";
     }
 
 
@@ -117,7 +118,7 @@ public class Menu : MonoBehaviour
 	public void OnPlay()
 	{
 		this.Shown = false;
-		GameManager.Instance.StartGame();
+		GameManager.Instance.ChooseStartingArea();
 	}
 
 	public void OnMainVolumeChanged(float value)

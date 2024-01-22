@@ -13,8 +13,10 @@ public class Formation : Unit
 
 	bool waitForPosition;
 	bool areUnitsAttacking = false;
+	bool isDestroyed;
 
 	public FormationType FormationType { get; set; } = FormationType.LINE;
+	public override bool IsSelectable => false;
 
 
 	public void OnCreation(IEnumerable<Unit> units)
@@ -87,6 +89,8 @@ public class Formation : Unit
 
 	protected override void FixedUpdate()
 	{
+		if (this.isDestroyed)
+			return;
 
 		if (this.IsMoving && this.waitForPosition)
 		{
@@ -117,18 +121,12 @@ public class Formation : Unit
 		
 		if(this.IsAttacking && this.DamageableTarget.IsDead)
 		{
-			GameObject.Destroy(this.gameObject);
-
-			foreach (Unit u in this.units)
-			{
-				u.LeaveFormationWithoutNotification();
-				//AttackMoveAction action = new AttackMoveAction(u);
-				//action.EnqueueAttack(this.DamageableTarget);
-				//u.EnqueueAction(action, true);
-			}
+			this.DestroyFormation();
+			return;
 		}
 
-		base.FixedUpdate();
+		if (!this.isDestroyed)
+			base.FixedUpdate();
 	}
 
 
@@ -178,6 +176,7 @@ public class Formation : Unit
 
 	public void DestroyFormation()
 	{
+		this.isDestroyed = true;
 		GameObject.Destroy(this.gameObject);
 
 		foreach (Unit u in this.units)

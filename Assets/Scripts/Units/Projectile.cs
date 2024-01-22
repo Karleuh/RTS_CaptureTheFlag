@@ -14,7 +14,7 @@ public class Projectile : MonoBehaviour
 	LayerMask unitLayer;
 
 
-	float damage;
+	int damage;
 	Unit source;
 	Rigidbody body;
 
@@ -28,7 +28,7 @@ public class Projectile : MonoBehaviour
 		this.body = this.GetComponent<Rigidbody>();
 	}
 
-	public void Launch(float damage, Unit source, Vector3 position, Vector3 speed)
+	public void Launch(int damage, Unit source, Vector3 position, Vector3 speed)
 	{
 		this.body = this.GetComponent<Rigidbody>();
 
@@ -53,7 +53,7 @@ public class Projectile : MonoBehaviour
 			if (damageable != null && !damageable.IsDead && damageable.Team != this.source.Team)
 			{
 				Destroy(this.gameObject);
-				damageable.Hit(this.damage);
+				damageable.Hit(DamageType.PIERCE, this.damage);
 				return;
 			}
 		}

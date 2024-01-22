@@ -41,12 +41,12 @@ public class NavMeshBasicUnit : Unit, IDamageable
 		throw new System.NotImplementedException();
 	}
 
-	public void Hit(float damagePoints)
+	public void Hit(DamageType damageType, int damagePoints)
 	{
 		throw new System.NotImplementedException();
 	}
 
-	public void Heal(float healingPoints)
+	public void Heal(int healingPoints)
 	{
 		throw new System.NotImplementedException();
 	}

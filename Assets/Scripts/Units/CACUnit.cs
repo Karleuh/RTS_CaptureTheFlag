@@ -36,7 +36,7 @@ public class CACUnit : BasicUnit
 		else if(!hit && Time.time > this.timeAttackWasPerformed + delayToAttack)
 		{
 			this.hit = true;
-			this.DamageableTarget.Hit(this.Damage);
+			this.DamageableTarget.Hit(DamageType.MELEE, this.Damage);
 		}
 	}
 
