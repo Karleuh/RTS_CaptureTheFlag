@@ -40,7 +40,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 539876093615006762}
-  m_Mesh: {fileID: -137526657565633576, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  m_Mesh: {fileID: 4996261386503344866, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
 --- !u!23 &3804353937144582940
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -61,13 +61,13 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 6244666066401016369, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: 2100000, guid: 65b08ef3c10f2ee48a8757f9e5e434d5, type: 2}
   - {fileID: 4835078630258379571, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
-  - {fileID: -2404891402701243345, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
   - {fileID: 4217796364934669478, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
   - {fileID: 3328855280418784920, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
   - {fileID: 7038688542854162588, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
-  - {fileID: -5045690124019015747, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: -5554549695061106822, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
+  - {fileID: 326515488694519087, guid: 8f938fcf870cc9d4481d6933486ecdc0, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -346,9 +346,12 @@ MonoBehaviour:
   damage: 40
   attackCooldown: 2
   speed: 5
-  team: 1
+  team: 2
   stance: 0
   maxHealth: 100
+  pierceArmor: 1
+  meleeArmor: 10
+  weight: 40
   healthBar: {fileID: 7992178979845660192}
   hitAudio: {fileID: 8300000, guid: e9d2b31e87fa326469b620eaab80bf69, type: 3}
   deathAudio: {fileID: 8300000, guid: 8b5e28b20b804fc4ea7e0de9a83c4868, type: 3}

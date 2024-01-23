@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4923021326336910658}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 109.64, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 144.50688, y: -59.782043, z: 0}
 --- !u!33 &412074347605162126
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -110,7 +110,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4923021326336910713}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 21.81, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -139,19 +139,22 @@ MonoBehaviour:
   damage: 100
   attackCooldown: 4
   speed: 5
-  team: 1
+  team: 2
   stance: 2
   maxHealth: 100
-  healthBar: {fileID: 0}
+  pierceArmor: 40
+  meleeArmor: 1
+  weight: 0
+  healthBar: {fileID: 4923021327174462182}
   hitAudio: {fileID: 8300000, guid: e9d2b31e87fa326469b620eaab80bf69, type: 3}
   deathAudio: {fileID: 8300000, guid: 8b5e28b20b804fc4ea7e0de9a83c4868, type: 3}
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 4923021326336910719}
   anim: {fileID: 4923021326336910716}
   dieAnimation: OnagerDie
   attackAnimation: OnagerAttack
   delayToAttack: 0.21666667
-  projectile: {fileID: 2533528842432448292, guid: ade0282820baa894bbcf6e4c040dd9b7, type: 3}
-  maxArrowAngle: 55
+  projectile: {fileID: 996965921738277455, guid: b4a9ee125b819b64282b6d7f3bfb7928, type: 3}
+  maxArrowAngle: 85
 --- !u!111 &4923021326336910716
 Animation:
   m_ObjectHideFlags: 0
@@ -578,7 +581,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4923021326336910658}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 109.64305, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 128.94527, y: -90, z: 0}
 --- !u!33 &391226888198175123
 MeshFilter:
   m_ObjectHideFlags: 0

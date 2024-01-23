@@ -13,8 +13,11 @@ public class Terrain : MonoBehaviour
 	[SerializeField]
 	MeshFilter plainMeshFilter;
 
+
 	[SerializeField]
-	float strength;
+	int width = 100;
+	[SerializeField]
+	int height = 100;
 
 	[SerializeField]
 	float scale;
@@ -27,7 +30,7 @@ public class Terrain : MonoBehaviour
 	float nearForestThreshold;
 
 	[SerializeField]
-	float niceZoneRadius;
+	float centerZoneRadius;
 
 	[SerializeField]
 	float aSigmoid;
@@ -47,10 +50,10 @@ public class Terrain : MonoBehaviour
 
 
 	[SerializeField]
-	long seed = 0;
+	long setSeed = 0;
 
-	int width = 100;
-	int height = 100;
+	public float CenterZoneRadius => this.centerZoneRadius;
+
 
 	char[] terrainType; //0 for forest, 1 for near forest, 2 for plain
 	Vector2Int[] closestAccessible; 
@@ -71,7 +74,6 @@ public class Terrain : MonoBehaviour
 		{
 			Terrain.instance = this;
 
-			this.terrainType = new char[width * height];
 			this.Generate();
 		}
 		else
@@ -90,10 +92,10 @@ public class Terrain : MonoBehaviour
 	public void Generate()
 	{
 		Debug.Log("=================== Generation =======================");
-		if(this.seed == 0)
-			this.seed = (long)(Random.value * long.MaxValue);
-		OpenSimplexNoise noise = new OpenSimplexNoise(this.seed);
-		Debug.Log("Seed : " + this.seed);
+		this.terrainType = new char[width * height];
+		long seed = this.setSeed == 0 ? (long)(Random.value * long.MaxValue) : this.setSeed;
+		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
+		Debug.Log("Seed : " + seed);
 
 		List<Vector3> forestVertices = new List<Vector3>();
 		List<int> forestIndices = new List<int>();
@@ -120,7 +122,7 @@ public class Terrain : MonoBehaviour
 
 				float dist = Mathf.Sqrt((i - width / 2) * (i - width / 2) + (j - height / 2) * (j - height / 2));
 
-				float sig = this.Sigmoid(dist, this.aSigmoid, this.niceZoneRadius);
+				float sig = this.Sigmoid(dist, this.aSigmoid, this.centerZoneRadius);
 
 				float t = Mathf.Abs((float)noise.Evaluate(i * scale, j * scale)) * sig;
 

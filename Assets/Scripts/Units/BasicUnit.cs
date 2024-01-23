@@ -13,6 +13,8 @@ public class BasicUnit : Unit, IDamageable
 	int pierceArmor = 0;
 	[SerializeField]
 	int meleeArmor = 0;
+	[SerializeField]
+	int weight = 0;
 	[SerializeField] HealthBar healthBar;
 
 	[Header("Audio")]
@@ -41,7 +43,10 @@ public class BasicUnit : Unit, IDamageable
 	SimpleConcatLinkedList<Vector2Int> checkpoints = new SimpleConcatLinkedList<Vector2Int>();
 	Vector2 target;
 	float timeSinceFormationSpotInObstacle;
+
 	public bool IsDead => this.health <= 0;
+	public bool IsKing { get; private set; }
+	public override int Weight => this.weight;
 
 	public Stance Stance
 	{
@@ -57,6 +62,9 @@ public class BasicUnit : Unit, IDamageable
 
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
+		if (!Terrain.instance.IsInTerrain(Vector2Int.FloorToInt(pos)))
+			return;
+
 		Vector2 prevTarget = this.target;
 		bool isTargetInObstacle = Vector2Int.FloorToInt(pos) != Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos));
 		this.target = !isTargetInObstacle ? pos : Terrain.instance.GetClosestAccessiblePos(Vector2Int.FloorToInt(pos)) + new Vector2(0.5f, 0.5f);
@@ -150,6 +158,7 @@ public class BasicUnit : Unit, IDamageable
 		switch (this.Stance)
 		{
 			case Stance.AGGRESSIVE:
+				this.canMoveWhileAttacking = true;
 				if (!this.IsAttacking)
 				{
 					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
@@ -162,9 +171,11 @@ public class BasicUnit : Unit, IDamageable
 				}
 				break;
 			case Stance.DEFENSIVE:
-				if (!this.IsAttacking && !this.IsMoving)
+				this.canMoveWhileAttacking = true;
+				if (!this.IsAttacking)
 				{
-					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
+
+					if (!this.IsMoving && Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
 					{
 						IDamageable target = this.FindClosestUnitInLineOfSight();
 
@@ -203,6 +214,7 @@ public class BasicUnit : Unit, IDamageable
 				}
 				break;
 			case Stance.STAND_GROUND:
+				this.canMoveWhileAttacking = false;
 				if (!this.IsAttacking)
 				{
 					if (Time.time > this.lastTimeUnitsChecked + BasicUnit.CHECK_FOR_UNITS_COOLDOWN)
@@ -272,6 +284,10 @@ public class BasicUnit : Unit, IDamageable
 					//this.checkpoints.RemoveAt(this.checkpoints.Count - 1);
 					this.checkpoints.RemoveLast();
 			}
+
+			if (this.team == Team.ATTACKER && Vector2Int.FloorToInt(this.Position) == Vector2Int.zero && GameManager.Instance.OnWalkOnFlag(this))
+				this.IsKing = true;
+
 		}
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
 	}
@@ -283,6 +299,8 @@ public class BasicUnit : Unit, IDamageable
 	{
 		this.checkpoints.Clear();
 		this.IsMoving = false;
+		if (!this.IsWaitingForAction)
+			this.defensivePosition = this.Position;
 	}
 
 	public void DebugPath()
@@ -299,7 +317,7 @@ public class BasicUnit : Unit, IDamageable
 
 	public void Hit(DamageType damageType, int damagePoints)
 	{
-		this.health -= (damagePoints - (damageType == DamageType.MELEE ? this.meleeArmor : damageType == DamageType.PIERCE ? this.pierceArmor : 0));
+		this.health -= Mathf.Max(damagePoints - (damageType == DamageType.MELEE ? this.meleeArmor : damageType == DamageType.PIERCE ? this.pierceArmor : 0), 0);
 		if (this.health < 0)
 		{
 			this.health = 0;
@@ -309,9 +327,11 @@ public class BasicUnit : Unit, IDamageable
 			this.healthBar.SetAmount(0);
 			this.Formation = null;
 			GameManager.Instance.OnUnitDead(this.Team);
+			if (this.IsKing)
+				GameManager.Instance.OnKingDeath();
 			return;
 		}
-		this.healthBar.SetAmount(this.health / this.maxHealth);
+		this.healthBar.SetAmount((float)this.health / this.maxHealth);
 
 		//Audio hit
 
@@ -325,5 +345,12 @@ public class BasicUnit : Unit, IDamageable
 		if (this.health > this.maxHealth)
 			this.health = this.maxHealth;
 		this.healthBar.SetAmount(this.health / this.maxHealth);
+	}
+
+	public void ApplyForce(Vector3 force)
+	{
+		this.StopAll();
+		this.transform.position += force;
+		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
 	}
 }

@@ -14,4 +14,5 @@ public interface IDamageable
 	bool IsDead { get; }
 	Team Team { get; }
 	Vector2 Position { get; }
+	void ApplyForce(Vector3 force);
 }

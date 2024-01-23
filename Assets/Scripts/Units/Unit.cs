@@ -30,6 +30,7 @@ public abstract class Unit : MonoBehaviour
 
 	private Vector2 position;
 	private Vector3 size;
+	protected bool canMoveWhileAttacking = true;
 
 	public IDamageable DamageableTarget { get; private set; }
 
@@ -95,7 +96,7 @@ public abstract class Unit : MonoBehaviour
 
 	public bool IsWaitingForAction { get => this.unitActions.Count == 0; }
 
-
+	private bool _isMoving;
 	public bool IsMoving { get; protected set; }
 	public bool IsAttacking { get; private set; }
 
@@ -115,7 +116,7 @@ public abstract class Unit : MonoBehaviour
 	public Team Team { get => this.team; private set => this.team = value; }
 
 	public virtual bool IsSelectable { get; }
-
+	public abstract int Weight { get; }
 
 	protected virtual void Start()
 	{
@@ -186,7 +187,7 @@ public abstract class Unit : MonoBehaviour
 	{
 		if (this.DamageableTarget == null || this.DamageableTarget.IsDead)
 			this.StopAttack();
-		else if(Utils.SqrDistance(this.Position, DamageableTarget.Position) > this.MaxRange * this.MaxRange)
+		else if((!this.IsWaitingForAction || this.canMoveWhileAttacking) && Utils.SqrDistance(this.Position, DamageableTarget.Position) > this.MaxRange * this.MaxRange)
 		{
 			if(this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
 			{
@@ -194,7 +195,7 @@ public abstract class Unit : MonoBehaviour
 				this.lastTimePathCalculated = Time.time;
 			}
 		}
-		else if(Utils.SqrDistance(this.Position, DamageableTarget.Position) < this.MinRange * this.MinRange)
+		else if((!this.IsWaitingForAction || this.canMoveWhileAttacking) && Utils.SqrDistance(this.Position, DamageableTarget.Position) < this.MinRange * this.MinRange)
 		{
 			if (this.lastTimePathCalculated + Unit.RECALCULATE_PATH_COOLDOWN < Time.time || !this.IsMoving)
 			{

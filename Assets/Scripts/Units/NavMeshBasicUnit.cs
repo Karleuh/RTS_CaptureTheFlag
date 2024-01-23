@@ -12,6 +12,8 @@ public class NavMeshBasicUnit : Unit, IDamageable
 
 	public bool IsDead => throw new System.NotImplementedException();
 
+	public override int Weight => throw new System.NotImplementedException();
+
 	public override void MoveTo(Vector2 pos, bool isCheckpoint = false)
 	{
 		this.targetPos = pos;
@@ -47,6 +49,11 @@ public class NavMeshBasicUnit : Unit, IDamageable
 	}
 
 	public void Heal(int healingPoints)
+	{
+		throw new System.NotImplementedException();
+	}
+
+	public void ApplyForce(Vector3 direction)
 	{
 		throw new System.NotImplementedException();
 	}

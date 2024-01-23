@@ -17,6 +17,7 @@ public class Formation : Unit
 
 	public FormationType FormationType { get; set; } = FormationType.LINE;
 	public override bool IsSelectable => false;
+	public override int Weight => 0;
 
 
 	public void OnCreation(IEnumerable<Unit> units)

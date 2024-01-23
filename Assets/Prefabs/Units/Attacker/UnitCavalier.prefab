@@ -222,6 +222,9 @@ MonoBehaviour:
   team: 1
   stance: 0
   maxHealth: 100
+  pierceArmor: 0
+  meleeArmor: 0
+  weight: 80
   healthBar: {fileID: 3105264721197937099}
   hitAudio: {fileID: 8300000, guid: e9d2b31e87fa326469b620eaab80bf69, type: 3}
   deathAudio: {fileID: 8300000, guid: 8b5e28b20b804fc4ea7e0de9a83c4868, type: 3}

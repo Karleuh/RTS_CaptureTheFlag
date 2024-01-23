@@ -46,8 +46,10 @@ public class Player : MonoBehaviour
 
 	List<GameObject> selectionCircles = new List<GameObject>();
 
+	private const float DOUBLE_CLICK_DELAY = .5f;
 	private Vector3 camForward;
 	private Formation currentFormation;
+	private float lastTimeClickedOnUnit;
 
 
 
@@ -247,61 +249,8 @@ public class Player : MonoBehaviour
 		{
 			if (this.isMassSelecting)
 			{
-				//TODO fix selection
-				Vector2 tl = GameManager.Instance.GetPosFromScreenPoint(this.startMousePos);
-				Vector2 br = GameManager.Instance.GetPosFromScreenPoint(Input.mousePosition);
-				Vector2 tr = GameManager.Instance.GetPosFromScreenPoint(new Vector3(Input.mousePosition.x, this.startMousePos.y));
-				Vector2 bl = GameManager.Instance.GetPosFromScreenPoint(new Vector3(this.startMousePos.x, Input.mousePosition.y));
 
-
-				int minX = (int)Mathf.Min(tl.x, br.x		, tr.x, bl.x);
-				int maxX = (int)Mathf.Max(tl.x, br.x		, tr.x, bl.x);
-				int minY = (int)Mathf.Min(tl.y, br.y		, tr.y, bl.y);
-				int maxY = (int)Mathf.Max(tl.y, br.y		, tr.y, bl.y);
-
-
-				for (int x = minX / UnitManager.chunckSize; x <= maxX/ UnitManager.chunckSize; x++)
-				{
-					for (int y = minY / UnitManager.chunckSize; y <= maxY / UnitManager.chunckSize; y++)
-					{
-						IReadOnlyCollection<Unit> units = UnitManager.GetUnitsInChunk(new ChunkPos(x, y));
-
-						if (units != null)
-						{
-							foreach (var unit in units)
-							{
-								if (unit != null && unit.gameObject != null && unit.IsSelectable && unit.Team == GameManager.Instance.PlayerTeam
-									&& Vector2.Dot(Vector2.Perpendicular(tl - bl), unit.Position - bl) < 0
-									&& Vector2.Dot(Vector2.Perpendicular(tr - tl), unit.Position - tl) < 0
-									&& Vector2.Dot(Vector2.Perpendicular(br - tr), unit.Position - br) < 0
-									&& Vector2.Dot(Vector2.Perpendicular(bl - br), unit.Position - br) < 0
-									)
-								{
-									this.selectedUnits.Add(unit);
-									GameObject circle = null;
-									if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
-									{
-										circle = this.selectionCircles[this.selectedUnits.Count - 1];
-										if (circle == null)
-											circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
-										else
-										{
-											circle.transform.SetParent(unit.transform);
-											circle.transform.localPosition = new Vector3(0, 0.2f, 0);
-											circle.SetActive(true);
-										}
-									}
-									else
-									{
-										circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
-										this.selectionCircles.Add(circle);
-									}
-								}
-							}
-						}
-					}
-
-				}
+				this.SelectAllUnitsInScreenSquareSquare(this.startMousePos, Input.mousePosition);
 
 				this.selectionSquare.gameObject.SetActive(false);
 				this.isMassSelecting = false;
@@ -318,6 +267,7 @@ public class Player : MonoBehaviour
 					if (unit != null && unit.Team == GameManager.Instance.PlayerTeam)
 					{
 						this.selectedUnits.Add(unit);
+
 
 						GameObject circle = null;
 						if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
@@ -337,6 +287,17 @@ public class Player : MonoBehaviour
 							circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
 							this.selectionCircles.Add(circle);
 						}
+
+
+						if (Time.time < this.lastTimeClickedOnUnit + Player.DOUBLE_CLICK_DELAY)
+						{
+							this.SelectAllUnitsInScreenSquareSquare(new Vector3(0, Screen.height), new Vector3(Screen.width, 0), unit.Weight);
+						}
+						else
+							lastTimeClickedOnUnit = Time.time;
+
+						if (this.selectedUnits.Count > 1)                           // show formation panel
+							this.formationPanel.gameObject.SetActive(true);
 					}
 				}
 
@@ -364,6 +325,65 @@ public class Player : MonoBehaviour
 		return null;
 	}
 
+
+
+	private void SelectAllUnitsInScreenSquareSquare(Vector3 topLeftScreen, Vector3 bottomRightScreen, int weight = int.MaxValue)
+	{
+		Vector2 tl = GameManager.Instance.GetPosFromScreenPoint(topLeftScreen);
+		Vector2 br = GameManager.Instance.GetPosFromScreenPoint(bottomRightScreen);
+		Vector2 tr = GameManager.Instance.GetPosFromScreenPoint(new Vector3(bottomRightScreen.x, topLeftScreen.y));
+		Vector2 bl = GameManager.Instance.GetPosFromScreenPoint(new Vector3(topLeftScreen.x, bottomRightScreen.y));
+
+
+		int minX = (int)Mathf.Min(tl.x, br.x, tr.x, bl.x);
+		int maxX = (int)Mathf.Max(tl.x, br.x, tr.x, bl.x);
+		int minY = (int)Mathf.Min(tl.y, br.y, tr.y, bl.y);
+		int maxY = (int)Mathf.Max(tl.y, br.y, tr.y, bl.y);
+
+
+		for (int x = minX / UnitManager.chunckSize; x <= maxX / UnitManager.chunckSize; x++)
+		{
+			for (int y = minY / UnitManager.chunckSize; y <= maxY / UnitManager.chunckSize; y++)
+			{
+				IReadOnlyCollection<Unit> units = UnitManager.GetUnitsInChunk(new ChunkPos(x, y));
+
+				if (units != null)
+				{
+					foreach (var unit in units)
+					{
+						if (unit != null && unit.gameObject != null && !this.selectedUnits.Contains(unit) && unit.IsSelectable && unit.Team == GameManager.Instance.PlayerTeam && (weight == int.MaxValue || unit.Weight == weight)
+							&& Vector2.Dot(Vector2.Perpendicular(tl - bl), unit.Position - bl) < 0
+							&& Vector2.Dot(Vector2.Perpendicular(tr - tl), unit.Position - tl) < 0
+							&& Vector2.Dot(Vector2.Perpendicular(br - tr), unit.Position - br) < 0
+							&& Vector2.Dot(Vector2.Perpendicular(bl - br), unit.Position - br) < 0
+							)
+						{
+							this.selectedUnits.Add(unit);
+							GameObject circle = null;
+							if (this.selectedUnits.Count > 0 && this.selectedUnits.Count <= this.selectionCircles.Count)
+							{
+								circle = this.selectionCircles[this.selectedUnits.Count - 1];
+								if (circle == null)
+									circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
+								else
+								{
+									circle.transform.SetParent(unit.transform);
+									circle.transform.localPosition = new Vector3(0, 0.2f, 0);
+									circle.SetActive(true);
+								}
+							}
+							else
+							{
+								circle = GameObject.Instantiate(this.selectionCirclePrefab, unit.transform);
+								this.selectionCircles.Add(circle);
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
 
 
 

@@ -150,7 +150,7 @@ public class Menu : MonoBehaviour
 
 	public void OnTeamChanged(int value)
 	{
-		this.player.Team = value == 0 ? Team.ATTACKER : Team.DEFENDER;
+		GameManager.Instance.PlayerTeam = (value == 0 ? Team.ATTACKER : Team.DEFENDER);
 	}
 
 

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 
 
@@ -13,6 +14,14 @@ public class Projectile : MonoBehaviour
 	[SerializeField]
 	LayerMask unitLayer;
 
+	[SerializeField]
+	bool isExplosive;
+
+	[SerializeField]
+	float explosionRadius;
+
+	[SerializeField]
+	float explosionForce;
 
 	int damage;
 	Unit source;
@@ -21,7 +30,7 @@ public class Projectile : MonoBehaviour
 
 	public float Speed { get => this.speed;}
 	public float Gravity { get => this.gravity;}
-	float previousDeltaTime;
+	Vector3 previousPos;
 
 	private void Start()
 	{
@@ -36,7 +45,7 @@ public class Projectile : MonoBehaviour
 		this.transform.forward = speed.normalized;
 		this.damage = damage;
 		this.source = source;
-		this.previousDeltaTime = Time.fixedDeltaTime;
+		this.previousPos = position;
 
 		this.body.velocity = speed;
 	}
@@ -45,36 +54,70 @@ public class Projectile : MonoBehaviour
 	public void FixedUpdate()
 	{
 		//collision check
-		Vector3 velocity = this.body.velocity;
-		if (Physics.Raycast(this.transform.position - previousDeltaTime * velocity, velocity, out RaycastHit hit, velocity.magnitude * previousDeltaTime * 2, this.unitLayer))
+		Vector3 direction = this.transform.position - this.previousPos;
+		float length = direction.magnitude;
+		direction.x = direction.x/length;
+		direction.y = direction.y/length;
+		direction.z = direction.z/length;
+		if (Physics.Raycast(this.previousPos, direction, out RaycastHit hit, length, this.unitLayer))
 		{
-			IDamageable damageable = hit.collider.gameObject.GetComponent<IDamageable>();
-
-			if (damageable != null && !damageable.IsDead && damageable.Team != this.source.Team)
+			if (this.isExplosive)
 			{
-				Destroy(this.gameObject);
-				damageable.Hit(DamageType.PIERCE, this.damage);
-				return;
+				this.Explose(hit.point);
 			}
+			else
+			{
+				IDamageable damageable = hit.collider.gameObject.GetComponent<IDamageable>();
+
+				if (damageable != null && !damageable.IsDead && damageable.Team != this.source.Team)
+				{
+					Destroy(this.gameObject);
+					damageable.Hit(DamageType.PIERCE, this.damage);
+					return;
+				}
+			}
+
+
+
 		}
 
-
-		//delete
-		if (this.transform.position.y <= 0)
+		float t = (0 - this.previousPos.y) / (direction.y); //check ground collision
+		if (t > 0 && t <= length)
 		{
+			if (this.isExplosive)
+			{
+				Vector3 pos = previousPos + t*direction;
+				Debug.Log(pos);
+				this.Explose(pos);
+			}
 			Destroy(this.gameObject);
 			return;
 		}
 
+		this.previousPos = this.transform.position;
 
-
-
+		Vector3 velocity = this.body.velocity;
 		//velocity
 		velocity.y -= this.Gravity * Time.fixedDeltaTime;
 		this.body.velocity = velocity;
 		this.transform.forward = velocity.normalized;
+	}
 
-		this.previousDeltaTime = Time.fixedDeltaTime;
+
+
+	public void Explose(Vector3 point)
+	{
+		List<IDamageable> units = UnitManager.OverlapCircleUnitDamageable(new Vector2(point.x, point.z), this.explosionRadius, this.source.Team == Team.ATTACKER ? Team.DEFENDER : Team.ATTACKER);
+
+		foreach(IDamageable d in units)
+		{
+			d.Hit(DamageType.MELEE, this.damage);
+
+			Vector3 direction = new Vector3(d.Position.x - point.x, 0, d.Position.y - point.z);
+			direction.Normalize();
+
+			d.ApplyForce(direction * this.explosionForce);
+		}
 
 	}
 
