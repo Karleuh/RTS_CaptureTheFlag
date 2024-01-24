@@ -87,7 +87,6 @@ public class Projectile : MonoBehaviour
 			if (this.isExplosive)
 			{
 				Vector3 pos = previousPos + t*direction;
-				Debug.Log(pos);
 				this.Explose(pos);
 			}
 			Destroy(this.gameObject);

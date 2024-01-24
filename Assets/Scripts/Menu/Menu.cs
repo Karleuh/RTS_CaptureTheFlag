@@ -16,10 +16,14 @@ public class Menu : MonoBehaviour
 	[SerializeField] TMPro.TMP_Text timeText;
 	[SerializeField] TMPro.TMP_Dropdown resolutionsDropdown;
 	[SerializeField] TMPro.TMP_Dropdown qualitiesDropdown;
+	[SerializeField] TMPro.TMP_Dropdown teamDropdown;
+	[SerializeField] TMPro.TMP_Dropdown mapDropdown;
 	[SerializeField] Slider masterSlider;
 	[SerializeField] Slider musicSlider;
 	[SerializeField] Slider effectsSlider;
 	[SerializeField] AudioMixer mixer;
+	[SerializeField] List<GameObject> toDisable;
+	[SerializeField] new ParticleSystem particleSystem;
 
 	Resolution[] resolutions;
 
@@ -34,6 +38,15 @@ public class Menu : MonoBehaviour
 			this.rulesMenu.SetActive(false);
 
 			this.popupWin.SetActive(false);
+
+			if (value)
+				particleSystem.Play();
+			else
+				particleSystem.Stop();
+
+			foreach (GameObject go in this.toDisable)
+				go.SetActive(!value);
+
 		}
 	}
 
@@ -118,7 +131,14 @@ public class Menu : MonoBehaviour
 	public void OnPlay()
 	{
 		this.Shown = false;
+		GameManager.Instance.PlayerTeam = (this.teamDropdown.value == 0 ? Team.ATTACKER : Team.DEFENDER);
+		Terrain.instance.TerrainToGenerate = this.mapDropdown.value;
 		GameManager.Instance.ChooseStartingArea();
+	}
+
+	public void OnQuit()
+	{
+		Application.Quit();
 	}
 
 	public void OnMainVolumeChanged(float value)

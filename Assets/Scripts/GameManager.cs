@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 	[System.Serializable]
 	public struct SpawnType
 	{
-		public Unit unit;
+		public BasicUnit unit;
 		public int minNumber;
 		public int maxNumber;
 
@@ -33,18 +33,24 @@ public class GameManager : MonoBehaviour
 	private List<SpawnType> attackerSpawnTypes;
 	[SerializeField]
 	GameObject flag;
+	[SerializeField]
+	GameObject flagAttackerPrefab;
 
 	public Team PlayerTeam { get; set; } = Team.ATTACKER;
 
 	private float startTime;
 	private bool isChoosingStartingArea;
 	private Vector2Int startingArea;
-	private bool flagTaken = false;
 
 	private float forbiddenZoneRadius;
 
-	private int remainingDefenserUnits;
-	private int remainingAttackerUnits;
+	private int remainingDefenserUnits = 0;
+	private int remainingAttackerUnits = 0;
+
+	private bool flagTaken = false;
+	private BasicUnit king;
+
+	List<BasicUnit> allUnits = new List<BasicUnit>();
 
 	public float GameTime => Time.time - this.startTime;
 	public bool IsGameStarted { get; private set; }
@@ -64,6 +70,9 @@ public class GameManager : MonoBehaviour
 	public void GameOver(bool win)
 	{
 		this.menu.OnWin(win);
+		foreach (BasicUnit u in this.allUnits)
+			if(u != null)
+				u.Hit(DamageType.DIRECT, int.MaxValue);
 		this.IsGameStarted = false;
 	}
 
@@ -100,9 +109,14 @@ public class GameManager : MonoBehaviour
 
 				if (Terrain.instance.IsInTerrain(pos) && Terrain.instance.GetClosestAccessiblePos(pos) == pos)
 				{
+
 					this.startingArea = pos;
+
+					GameObject.Instantiate(flagAttackerPrefab, new Vector3(this.startingArea.x, 0, this.startingArea.y), Quaternion.identity);
+
 					this.SpawnDefendersUnits(Vector2Int.zero, Team.DEFENDER);
 					this.SpawnDefendersUnits(this.startingArea, Team.ATTACKER);
+					break;
 				}
 			}
 		}
@@ -118,6 +132,8 @@ public class GameManager : MonoBehaviour
 			{
 				this.isChoosingStartingArea = false;
 				this.startingArea = startingPoint;
+				GameObject.Instantiate(flagAttackerPrefab, new Vector3(this.startingArea.x, 0, this.startingArea.y), Quaternion.identity);
+
 				this.lineRenderer.gameObject.SetActive(false);
 
 				this.SpawnDefendersUnits(Vector2Int.zero, Team.DEFENDER);
@@ -125,6 +141,12 @@ public class GameManager : MonoBehaviour
 				this.StartGame();
 
 			}
+		}
+
+		if(this.flagTaken)
+		{
+			if (Utils.SqrDistance(this.king.Position, this.startingArea) < 1.0f)
+				this.GameOver(true);
 		}
 	}
 
@@ -203,9 +225,19 @@ public class GameManager : MonoBehaviour
 
 			//spawn
 			Vector2Int pos = toAdd.Dequeue();
-			Unit u = GameObject.Instantiate(spawnTypes[currentSpawnType].unit, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
-				currentUnits.Add(u);
+			BasicUnit u = GameObject.Instantiate(spawnTypes[currentSpawnType].unit, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+			currentUnits.Add(u);
+			allUnits.Add(u);
 			unitIndex++;
+			switch(team)
+			{
+				case Team.DEFENDER:
+					this.remainingDefenserUnits++;
+					break;
+				case Team.ATTACKER:
+					this.remainingAttackerUnits++;
+					break;
+			}
 
 
 			//floodfill
@@ -308,18 +340,23 @@ public class GameManager : MonoBehaviour
 	//}
 
 
-	public void OnUnitDead(Team team)
+	public void OnUnitDead(BasicUnit basicUnit)
 	{
-		switch (team)
+		if(this.flagTaken && this.king.gameObject == basicUnit.gameObject)
 		{
-			case Team.ANY:
-				break;
+			this.GameOver(this.PlayerTeam == Team.DEFENDER);
+
+		}
+		switch (basicUnit.Team)
+		{
 			case Team.ATTACKER:
+				Debug.Log("Attacker ded");
 				this.remainingAttackerUnits--;
 				if (this.remainingAttackerUnits == 0 && this.PlayerTeam == Team.ATTACKER)
 					this.GameOver(false);
 				break;
 			case Team.DEFENDER:
+				Debug.Log("Defender ded");
 				this.remainingDefenserUnits--;
 				if (this.remainingDefenserUnits == 0 && this.PlayerTeam == Team.DEFENDER)
 					this.GameOver(false);
@@ -329,21 +366,17 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
-	public void OnKingDeath()
-	{
-		this.GameOver(this.PlayerTeam == Team.DEFENDER);
-	}
-
-
-	public bool OnWalkOnFlag(BasicUnit unit)
+	public void OnWalkOnFlag(BasicUnit unit)
 	{
 		if (this.flagTaken)
-			return false;
+			return;
 
 		this.flagTaken = true;
 		this.flag.transform.SetParent(unit.transform.GetChild(0));
 		this.flag.transform.localPosition = new Vector3(0.67f, 0.67f, 0);
 		this.flag.transform.localRotation = Quaternion.Euler(-180, 90, -90);
-		return true;
+
+		this.king = unit;
+
 	}
 }

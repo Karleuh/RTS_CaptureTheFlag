@@ -170,17 +170,19 @@ public abstract class Unit : MonoBehaviour
 			UnitManager.OnUnitMove(this, oldcp);
 		}
 
-		//actions
-		if (this.unitActions.Count > 0 && this.unitActions.Peek().IsFinished)
-			this.unitActions.Dequeue();
+		//attack
+		if (this.IsAttacking)
+			HandleAttack();
 
+		//actions
 		if (this.unitActions.Count > 0)
 			this.unitActions.Peek().FixedUpdate();
 
+		if (this.unitActions.Count > 0 && this.unitActions.Peek().IsFinished)
+			this.unitActions.Dequeue();
 
-		//attack
-		if(this.IsAttacking)
-			HandleAttack();
+
+
 	}
 
 	private void HandleAttack()

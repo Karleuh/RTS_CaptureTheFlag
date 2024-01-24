@@ -45,7 +45,6 @@ public class BasicUnit : Unit, IDamageable
 	float timeSinceFormationSpotInObstacle;
 
 	public bool IsDead => this.health <= 0;
-	public bool IsKing { get; private set; }
 	public override int Weight => this.weight;
 
 	public Stance Stance
@@ -54,7 +53,8 @@ public class BasicUnit : Unit, IDamageable
 		set
 		{
 			this.stance = value;
-			this.StopAttack();
+			if(this.IsWaitingForAction)
+				this.StopAll();
 		}
 	}
 
@@ -285,8 +285,8 @@ public class BasicUnit : Unit, IDamageable
 					this.checkpoints.RemoveLast();
 			}
 
-			if (this.team == Team.ATTACKER && Vector2Int.FloorToInt(this.Position) == Vector2Int.zero && GameManager.Instance.OnWalkOnFlag(this))
-				this.IsKing = true;
+			if (this.team == Team.ATTACKER && Vector2Int.FloorToInt(this.Position) == Vector2Int.zero)
+				GameManager.Instance.OnWalkOnFlag(this);
 
 		}
 		this.Position = new Vector2(this.transform.position.x, this.transform.position.z);
@@ -317,18 +317,20 @@ public class BasicUnit : Unit, IDamageable
 
 	public void Hit(DamageType damageType, int damagePoints)
 	{
+		if (this.IsDead)
+			return;
+
 		this.health -= Mathf.Max(damagePoints - (damageType == DamageType.MELEE ? this.meleeArmor : damageType == DamageType.PIERCE ? this.pierceArmor : 0), 0);
-		if (this.health < 0)
+		if (this.health <= 0)
 		{
 			this.health = 0;
-			this.audioSource.PlayOneShot(this.deathAudio);
 			this.anim.Play(this.dieAnimation);
 			this.timeDie = Time.time;
 			this.healthBar.SetAmount(0);
 			this.Formation = null;
-			GameManager.Instance.OnUnitDead(this.Team);
-			if (this.IsKing)
-				GameManager.Instance.OnKingDeath();
+			GameManager.Instance.OnUnitDead(this);
+			this.audioSource.PlayOneShot(this.deathAudio);
+
 			return;
 		}
 		this.healthBar.SetAmount((float)this.health / this.maxHealth);

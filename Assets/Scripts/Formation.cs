@@ -120,7 +120,7 @@ public class Formation : Unit
 			}
 		}
 		
-		if(this.IsAttacking && this.DamageableTarget.IsDead)
+		if(this.IsAttacking && this.DamageableTarget.IsDead && this.IsWaitingForAction)
 		{
 			this.DestroyFormation();
 			return;

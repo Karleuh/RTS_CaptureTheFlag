@@ -5,44 +5,73 @@ using UnityEngine;
 
 public class Terrain : MonoBehaviour
 {
+	public enum GenerationType
+	{
+		FOREST,
+		RAVIN
+	}
+
+	public enum TerrainType
+	{
+		FOREST,
+		NEAR_PLAIN,
+		PLAIN, 
+		PIT
+	}
+
+	[System.Serializable]
+	public struct Generator
+	{
+		[Header("Terrain")]
+		[SerializeField]
+		public GenerationType generationType;
+		[SerializeField]
+		public int width;
+		[SerializeField]
+		public int height;
+		[SerializeField]
+		public List<Material> materials;
+
+
+		[SerializeField]
+		public float scale;
+
+
+
+		[Header("Safe Zone")]
+		[SerializeField]
+		public float centerZoneRadius;
+
+		[SerializeField]
+		public float aSigmoid;
+
+		[Header("Trees")]
+		[SerializeField]
+		[Range(0, 1)]
+		public float forestThreshold;
+		[SerializeField]
+		[Range(0, 1)]
+		public float nearForestThreshold;
+		[SerializeField]
+		public Mesh trunkMesh;
+		[SerializeField]
+		public Mesh leavesMesh;
+		[SerializeField]
+		[Range(0, 1)]
+		public float treeDensity;
+
+	}
 
 	public static Terrain instance;
+
+	[SerializeField]
+	List<Generator> generators;
 
 	[SerializeField]
 	MeshFilter forestMeshFilter;
 	[SerializeField]
 	MeshFilter plainMeshFilter;
 
-
-	[SerializeField]
-	int width = 100;
-	[SerializeField]
-	int height = 100;
-
-	[SerializeField]
-	float scale;
-
-	[SerializeField]
-	[Range(0,1)]
-	float forestThreshold;
-	[SerializeField]
-	[Range(0, 1)]
-	float nearForestThreshold;
-
-	[SerializeField]
-	float centerZoneRadius;
-
-	[SerializeField]
-	float aSigmoid;
-
-	[Header("Trees")]
-	[SerializeField]
-	Mesh trunkMesh;
-	[SerializeField]
-	Mesh leavesMesh;
-	[SerializeField]
-	[Range(0, 1)]
-	float treeDensity;
 	[SerializeField]
 	MeshFilter trunksMeshFilter;
 	[SerializeField]
@@ -52,10 +81,12 @@ public class Terrain : MonoBehaviour
 	[SerializeField]
 	long setSeed = 0;
 
-	public float CenterZoneRadius => this.centerZoneRadius;
+	public float CenterZoneRadius {get; private set;}
 
+	int width;
+	int height;
 
-	char[] terrainType; //0 for forest, 1 for near forest, 2 for plain
+	char[] terrainType; //0 for forest, 1 for near forest, 2 for plain, 3 for pit
 	Vector2Int[] closestAccessible; 
 
 	List<Vector3> trunksVertices = new List<Vector3>();
@@ -66,6 +97,7 @@ public class Terrain : MonoBehaviour
 	List<int> leavesIndices = new List<int>();
 	List<Vector2> leavesUvs = new List<Vector2>();
 
+	public int TerrainToGenerate { get; set; }
 
 
 	private void Start()
@@ -74,7 +106,7 @@ public class Terrain : MonoBehaviour
 		{
 			Terrain.instance = this;
 
-			this.Generate();
+			//this.Generate();
 		}
 		else
 			GameObject.Destroy(this.gameObject);
@@ -92,7 +124,14 @@ public class Terrain : MonoBehaviour
 	public void Generate()
 	{
 		Debug.Log("=================== Generation =======================");
-		this.terrainType = new char[width * height];
+
+		Generator generator = this.generators[TerrainToGenerate];
+
+		this.width = generator.width;
+		this.height = generator.height;
+		this.CenterZoneRadius = generator.centerZoneRadius;
+
+		this.terrainType = new char[generator.width * generator.height];
 		long seed = this.setSeed == 0 ? (long)(Random.value * long.MaxValue) : this.setSeed;
 		OpenSimplexNoise noise = new OpenSimplexNoise(seed);
 		Debug.Log("Seed : " + seed);
@@ -113,82 +152,187 @@ public class Terrain : MonoBehaviour
 		this.leavesIndices.Clear();
 		this.leavesUvs.Clear();
 
-		for (int i = 0; i < width; i++)
+		for (int i = 0; i < generator.width; i++)
 		{
-			for (int j = 0; j < height; j++)
+			for (int j = 0; j < generator.height; j++)
 			{
 
 				//float t = ((float)noise.Evaluate(i * scale, j * scale) + 1 )/ 2;
 
-				float dist = Mathf.Sqrt((i - width / 2) * (i - width / 2) + (j - height / 2) * (j - height / 2));
-
-				float sig = this.Sigmoid(dist, this.aSigmoid, this.centerZoneRadius);
-
-				float t = Mathf.Abs((float)noise.Evaluate(i * scale, j * scale)) * sig;
-
-				this.terrainType[i + j * width] = t < this.forestThreshold ? t < this.nearForestThreshold ? (char) 2 : (char) 1 : (char)0;
-
-				if (t < this.forestThreshold)
+				switch (generator.generationType)
 				{
+					case GenerationType.FOREST:
+						float dist = Mathf.Sqrt((i - generator.width / 2) * (i - generator.width / 2) + (j - generator.height / 2) * (j - generator.height / 2));
 
-					plainVertices.AddRange(new Vector3[]
-					{
-						new Vector3(i - width/2, 0 , j - height/2),
-						new Vector3((i+1) - width/2, 0 , j - height/2),
-						new Vector3((i + 1) - width / 2, 0, (j + 1) - height / 2),
-						new Vector3(i - width / 2, 0, (j + 1) - height / 2),
-					});
+						float sig = this.Sigmoid(dist, generator.aSigmoid, generator.centerZoneRadius);
 
-					plainIndices.AddRange(new int[]
-					{
-						plainVertices.Count - 4, plainVertices.Count - 2, plainVertices.Count - 3,
-						plainVertices.Count - 4, plainVertices.Count - 1, plainVertices.Count - 2
-					});
+						float t = Mathf.Abs((float)noise.Evaluate(i * generator.scale, j * generator.scale)) * sig;
 
 
-					plainUvs.AddRange(new Vector2[]
-					{
-						new Vector2(0, 0),
-						new Vector2(1, 0),
-						new Vector2(1,1),
-						new Vector2(0, 1),
-					});
+
+						this.terrainType[i + j * generator.width] = t < generator.forestThreshold ? t < generator.nearForestThreshold ? (char)TerrainType.PLAIN : (char)TerrainType.NEAR_PLAIN : (char)TerrainType.FOREST;
+
+						if (t < generator.forestThreshold)
+						{
+
+							plainVertices.AddRange(new Vector3[]
+							{
+								new Vector3(i - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i+1) - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i + 1) - generator.width / 2, 0, (j + 1) - generator.height / 2),
+								new Vector3(i - generator.width / 2, 0, (j + 1) - generator.height / 2),
+							});
+
+							plainIndices.AddRange(new int[]
+							{
+								plainVertices.Count - 4, plainVertices.Count - 2, plainVertices.Count - 3,
+								plainVertices.Count - 4, plainVertices.Count - 1, plainVertices.Count - 2
+							});
+
+
+							plainUvs.AddRange(new Vector2[]
+							{
+								new Vector2(0, 0),
+								new Vector2(1, 0),
+								new Vector2(1,1),
+								new Vector2(0, 1),
+							});
+						}
+						else
+						{
+							forestVertices.AddRange(new Vector3[]
+							{
+								new Vector3(i - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i+1) - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i + 1) - generator.width / 2, 0, (j + 1) - generator.height / 2),
+								new Vector3(i - generator.width / 2, 0, (j + 1) - generator.height / 2),
+							});
+
+							forestIndices.AddRange(new int[]
+							{
+								forestVertices.Count - 4, forestVertices.Count - 2, forestVertices.Count - 3,
+								forestVertices.Count - 4, forestVertices.Count - 1, forestVertices.Count - 2
+							});
+
+
+							forestUvs.AddRange(new Vector2[]
+							{
+								new Vector2(0, 0),
+								new Vector2(1, 0),
+								new Vector2(1,1),
+								new Vector2(0, 1),
+							});
+
+							if (Random.value < generator.treeDensity)
+							{
+								Vector2 rand = Random.insideUnitCircle / 2;
+								Vector3 pos = new Vector3(i - generator.width / 2, 0, j - generator.height / 2) + new Vector3(0.5f + rand.x, 0, 0.5f + rand.y);
+
+								this.AddTree(generator, pos);
+							}
+						}
+						break;
+
+					case GenerationType.RAVIN:
+						dist = Mathf.Sqrt((i - generator.width / 2) * (i - generator.width / 2) + (j - generator.height / 2) * (j - generator.height / 2));
+
+						sig = this.Sigmoid(dist, generator.aSigmoid, generator.centerZoneRadius);
+
+						t = 1 - ((1 - Mathf.Abs((float)noise.Evaluate(i * generator.scale, j * generator.scale))) * sig);
+
+
+
+						this.terrainType[i + j * generator.width] = t > generator.forestThreshold ? t > generator.nearForestThreshold ? (char)TerrainType.PLAIN : (char)TerrainType.NEAR_PLAIN : (char)TerrainType.PIT;
+
+						if (t > generator.forestThreshold)
+						{
+
+							if (i * generator.height + j > (generator.height * generator.width) / 2.0f)
+							{
+								plainVertices.AddRange(new Vector3[]
+								{
+									new Vector3(i - generator.width/2, 0 , j - generator.height/2),
+									new Vector3((i+1) - generator.width/2, 0 , j - generator.height/2),
+									new Vector3((i + 1) - generator.width / 2, 0, (j + 1) - generator.height / 2),
+									new Vector3(i - generator.width / 2, 0, (j + 1) - generator.height / 2),
+
+									new Vector3(i - generator.width/2, -100 , j - generator.height/2),
+									new Vector3((i+1) - generator.width/2, -100 , j - generator.height/2),
+									new Vector3(i - generator.width / 2, -100, (j + 1) - generator.height / 2),
+								});
+
+								plainIndices.AddRange(new int[]
+								{
+									plainVertices.Count - 7, plainVertices.Count - 5, plainVertices.Count - 6,
+									plainVertices.Count - 7, plainVertices.Count - 4, plainVertices.Count - 5,
+
+									plainVertices.Count - 7, plainVertices.Count - 6, plainVertices.Count - 2,
+									plainVertices.Count - 7, plainVertices.Count - 2, plainVertices.Count - 3,
+
+									plainVertices.Count - 7, plainVertices.Count - 3, plainVertices.Count - 1,
+									plainVertices.Count - 7, plainVertices.Count - 1, plainVertices.Count - 4,
+								});
+
+
+								plainUvs.AddRange(new Vector2[]
+								{
+									new Vector2(0, 0),
+									new Vector2(1, 0),
+									new Vector2(1,1),
+									new Vector2(0, 1),
+
+									new Vector2(0, 0),
+									new Vector2(1, 0),
+									new Vector2(1,1),
+								});
+							}
+							else
+							{
+
+								forestVertices.AddRange(new Vector3[]
+								{
+								new Vector3(i - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i+1) - generator.width/2, 0 , j - generator.height/2),
+								new Vector3((i + 1) - generator.width / 2, 0, (j + 1) - generator.height / 2),
+								new Vector3(i - generator.width / 2, 0, (j + 1) - generator.height / 2),
+
+								new Vector3(i - generator.width/2, -100 , j - generator.height/2),
+								new Vector3((i+1) - generator.width/2, -100 , j - generator.height/2),
+								new Vector3(i - generator.width / 2, -100, (j + 1) - generator.height / 2),
+								});
+
+								forestIndices.AddRange(new int[]
+								{
+								forestVertices.Count - 7, forestVertices.Count - 5, forestVertices.Count - 6,
+								forestVertices.Count - 7, forestVertices.Count - 4, forestVertices.Count - 5,
+
+								forestVertices.Count - 7, forestVertices.Count - 6, forestVertices.Count - 2,
+								forestVertices.Count - 7, forestVertices.Count - 2, forestVertices.Count - 3,
+
+								forestVertices.Count - 7, forestVertices.Count - 3, forestVertices.Count - 1,
+								forestVertices.Count - 7, forestVertices.Count - 1, forestVertices.Count - 4,
+								});
+
+
+								forestUvs.AddRange(new Vector2[]
+								{
+								new Vector2(0, 0),
+								new Vector2(1, 0),
+								new Vector2(1,1),
+								new Vector2(0, 1),
+
+								new Vector2(0, 0),
+								new Vector2(1, 0),
+								new Vector2(1,1),
+								});
+						
+						
+							}
+
+
+						}
+						break;
 				}
-				else
-				{
-					forestVertices.AddRange(new Vector3[]
-					{
-						new Vector3(i - width/2, 0 , j - height/2),
-						new Vector3((i+1) - width/2, 0 , j - height/2),
-						new Vector3((i + 1) - width / 2, 0, (j + 1) - height / 2),
-						new Vector3(i - width / 2, 0, (j + 1) - height / 2),
-					});
-
-					forestIndices.AddRange(new int[]
-					{
-						forestVertices.Count - 4, forestVertices.Count - 2, forestVertices.Count - 3,
-						forestVertices.Count - 4, forestVertices.Count - 1, forestVertices.Count - 2
-					});
-
-
-					forestUvs.AddRange(new Vector2[]
-					{
-						new Vector2(0, 0),
-						new Vector2(1, 0),
-						new Vector2(1,1),
-						new Vector2(0, 1),
-					});
-
-					if (Random.value < this.treeDensity)
-					{
-						Vector2 rand = Random.insideUnitCircle / 2;
-						Vector3 pos = new Vector3(i - width / 2, 0, j - height / 2) + new Vector3(0.5f + rand.x, 0, 0.5f + rand.y);
-
-						this.AddTree(pos);
-					}
-				}
-
-
 			}
 		}
 		Mesh forestMesh = new Mesh();
@@ -198,13 +342,14 @@ public class Terrain : MonoBehaviour
 		forestMesh.uv = forestUvs.ToArray();
 		forestMesh.RecalculateNormals();
 		this.forestMeshFilter.mesh = forestMesh;
-
+		this.forestMeshFilter.GetComponent<MeshRenderer>().material = generator.materials[0];
 		Mesh plainMesh = new Mesh();
 
 		plainMesh.vertices = plainVertices.ToArray();
 		plainMesh.triangles = plainIndices.ToArray();
 		plainMesh.uv = plainUvs.ToArray();
 		plainMesh.RecalculateNormals();
+		this.plainMeshFilter.GetComponent<MeshRenderer>().material = generator.materials[1];
 		this.plainMeshFilter.mesh = plainMesh;
 
 		Mesh trunkMesh = new Mesh();
@@ -231,36 +376,36 @@ public class Terrain : MonoBehaviour
 		this.PreCalculateClosestWalkableTiles();
 	}
 
-	public void AddTree(Vector3 position)
+	public void AddTree(Generator generator, Vector3 position)
 	{
 		int prevTrunkCount = this.trunksVertices.Count;
 
-		foreach (Vector3 vertex in this.trunkMesh.vertices)
+		foreach (Vector3 vertex in generator.trunkMesh.vertices)
 		{
 			this.trunksVertices.Add(position + vertex);
 		}
 
-		foreach (int index in this.trunkMesh.triangles)
+		foreach (int index in generator.trunkMesh.triangles)
 		{
 			this.trunksIndices.Add(prevTrunkCount + index);
 		}
 
-		this.trunksUvs.AddRange(this.trunkMesh.uv);
+		this.trunksUvs.AddRange(generator.trunkMesh.uv);
 
 
 		int prevLeavesCount = this.leavesVertices.Count;
 
-		foreach (Vector3 vertex in this.leavesMesh.vertices)
+		foreach (Vector3 vertex in generator.leavesMesh.vertices)
 		{
 			this.leavesVertices.Add(position + vertex);
 		}
 
-		foreach (int index in this.leavesMesh.triangles)
+		foreach (int index in generator.leavesMesh.triangles)
 		{
 			this.leavesIndices.Add(prevLeavesCount + index);
 		}
 
-		this.leavesUvs.AddRange(this.leavesMesh.uv);
+		this.leavesUvs.AddRange(generator.leavesMesh.uv);
 
 	}
 
@@ -372,6 +517,8 @@ public class Terrain : MonoBehaviour
 				return 5;
 			case (char)2:
 				return 1;
+			case (char)3:
+				return 500;
 			default:
 				return 5;
 		}
@@ -390,6 +537,8 @@ public class Terrain : MonoBehaviour
 				return 5;
 			case (char)2:
 				return 1;
+			case (char)3:
+				return 500;
 			default:
 				return 5;
 		}
@@ -398,7 +547,7 @@ public class Terrain : MonoBehaviour
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public bool IsObstacle(int x, int y)
 	{
-		return this.terrainType[(x + width / 2) + (y + height / 2) * this.width] < 1;
+		return this.terrainType[(x + width / 2) + (y + height / 2) * this.width] == 1 || this.terrainType[(x + width / 2) + (y + height / 2) * this.width] == 3;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
 
 	[Header("Gameplay")]
 	[SerializeField] UnitActionType unitAction;
+	[SerializeField] Stance stance;
 	[SerializeField] FormationType formationType;
 
 
@@ -33,9 +34,11 @@ public class Player : MonoBehaviour
 	[SerializeField]
 	RectTransform orderPanel;
 	[SerializeField]
-	Canvas canvas;
+	RectTransform stancePanel;
 	[SerializeField]
 	RectTransform formationPanel;
+	[SerializeField]
+	Canvas canvas;
 
 
 
@@ -254,9 +257,6 @@ public class Player : MonoBehaviour
 
 				this.selectionSquare.gameObject.SetActive(false);
 				this.isMassSelecting = false;
-
-				if (this.selectedUnits.Count > 1)							// show formation panel
-					this.formationPanel.gameObject.SetActive(true);
 			}
 			else
 			{
@@ -296,12 +296,33 @@ public class Player : MonoBehaviour
 						else
 							lastTimeClickedOnUnit = Time.time;
 
-						if (this.selectedUnits.Count > 1)                           // show formation panel
-							this.formationPanel.gameObject.SetActive(true);
 					}
 				}
 
 			}
+
+			if(this.selectedUnits.Count > 0 )
+			{
+				var enumerator = this.selectedUnits.GetEnumerator();
+				enumerator.MoveNext();
+
+				BasicUnit b = enumerator.Current as BasicUnit;
+				if (b != null)
+					this.stance = b.Stance;
+
+				int istance = (int)this.stance;
+				for (int i = 0; i < this.stancePanel.childCount; i++)
+				{
+					RectTransform child = this.stancePanel.GetChild(i) as RectTransform;
+
+					child.GetChild(0).GetChild(0).gameObject.SetActive(i == istance);
+				}
+
+				if (this.selectedUnits.Count > 1)                          // show formation panel
+					this.formationPanel.gameObject.SetActive(true);
+			}
+
+
 		}
 	}
 
@@ -409,6 +430,29 @@ public class Player : MonoBehaviour
 		}
 	}
 
+	public void OnStanceButtonClick(int stance)
+	{
+		this.stance = (Stance)stance;
+		for (int i = 0; i < this.stancePanel.childCount; i++)
+		{
+			RectTransform child = this.stancePanel.GetChild(i) as RectTransform;
+
+			child.GetChild(0).GetChild(0).gameObject.SetActive(i == stance);
+		}
+
+		this.ApplyStance();
+	}
+
+	private void ApplyStance()
+	{
+		foreach(Unit u in this.selectedUnits)
+		{
+			BasicUnit b = u as BasicUnit;
+
+			if (b != null)
+				b.Stance = this.stance;
+		}
+	}
 
 	public void OnFormationSelectionButtonClick(int formationType)
 	{

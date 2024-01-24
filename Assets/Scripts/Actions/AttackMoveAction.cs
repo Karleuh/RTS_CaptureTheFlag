@@ -22,7 +22,7 @@ public class AttackMoveAction : UnitAction
 
 	public override bool IsFinished
 	{
-		get => !isNotStarted && ((this.isTargetingDamageables && this.damageables.Count == 0) || (!this.isTargetingDamageables && this.checkpoints.Count == 0) && !this.Unit.IsMoving && !this.Unit.IsAttacking);
+		get => !isNotStarted && ((this.isTargetingDamageables && this.damageables.Count == 0) || (!this.isTargetingDamageables && this.checkpoints.Count == 0)) && !this.Unit.IsMoving && !this.Unit.IsAttacking;
 	}
 
 	public override UnitActionType UnitActionType => UnitActionType.ATTACK_MOVE;
@@ -92,7 +92,7 @@ public class AttackMoveAction : UnitAction
 				} while (target.IsDead && this.damageables.Count > 0);
 
 				if(!target.IsDead)
-				this.Unit.Attack(target);
+					this.Unit.Attack(target);
 			}
 		}
 		else
