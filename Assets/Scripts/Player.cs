@@ -157,6 +157,23 @@ public class Player : MonoBehaviour
 				targetUnit = damageable;
 		}
 
+
+		if (this.isUsingCompetance)
+		{
+			this.isUsingCompetance = false;
+
+			var enume = this.selectedUnits.GetEnumerator();
+			enume.MoveNext();
+			OnagerUnit ou = enume.Current as OnagerUnit;
+			if (ou != null)
+			{
+				ou.AttackPosition(targetPos);
+				return;
+			}
+
+		}
+
+
 		Unit currentUnit = null;
 
 		if(this.currentFormation != null && this.currentFormation.gameObject != null)
@@ -166,8 +183,6 @@ public class Player : MonoBehaviour
 		else if (this.selectedUnits.Count > 1)
 		{
 			this.currentFormation = new GameObject().AddComponent<Formation>();
-			this.currentFormation.gameObject.AddComponent<MeshFilter>().sharedMesh = testMesh;
-			this.currentFormation.gameObject.AddComponent<MeshRenderer>();
 			this.currentFormation.OnCreation(this.selectedUnits);
 			this.currentFormation.FormationType = this.formationType;
 
@@ -211,6 +226,7 @@ public class Player : MonoBehaviour
 		{
 			this.currentFormation = null;
 			this.formationPanel.gameObject.SetActive(false);
+			this.isUsingCompetance = false;
 
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
@@ -468,6 +484,18 @@ public class Player : MonoBehaviour
 			this.currentFormation.FormationType = this.formationType;
 	}
 
+	bool isUsingCompetance;
+
+	public void OnCompetanceClicked()
+	{
+		var enume = this.selectedUnits.GetEnumerator();
+		enume.MoveNext();
+		OnagerUnit ou = enume.Current as OnagerUnit;
+		if (ou != null)
+		{
+			this.isUsingCompetance = true;
+		}
+	}
 }
 
 

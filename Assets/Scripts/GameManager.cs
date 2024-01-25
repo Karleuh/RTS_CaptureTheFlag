@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField]
 	GameObject flag;
 	[SerializeField]
-	GameObject flagAttackerPrefab;
+	GameObject flagAttacker;
 
 	public Team PlayerTeam { get; set; } = Team.ATTACKER;
 
@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
 	List<BasicUnit> allUnits = new List<BasicUnit>();
 
 	public float GameTime => Time.time - this.startTime;
+	public float RemainingPlayerUnit => this.PlayerTeam == Team.ATTACKER ? this.remainingAttackerUnits : this.remainingDefenserUnits;
 	public bool IsGameStarted { get; private set; }
 
 
@@ -69,15 +70,26 @@ public class GameManager : MonoBehaviour
 
 	public void GameOver(bool win)
 	{
+		this.IsGameStarted = false;
 		this.menu.OnWin(win);
+		if (this.flag.transform.parent != null)
+		{
+			this.flag.transform.SetParent(null);
+			this.flag.transform.position = Vector3.zero;
+		}
+
 		foreach (BasicUnit u in this.allUnits)
 			if(u != null)
 				u.Hit(DamageType.DIRECT, int.MaxValue);
-		this.IsGameStarted = false;
 	}
 
 	public void ChooseStartingArea()
 	{
+		this.flagAttacker.SetActive(false);
+		this.remainingDefenserUnits = 0;
+		this.remainingAttackerUnits = 0;
+		this.allUnits.Clear();
+
 		if (this.PlayerTeam == Team.ATTACKER)
 		{
 			this.isChoosingStartingArea = true;
@@ -112,7 +124,8 @@ public class GameManager : MonoBehaviour
 
 					this.startingArea = pos;
 
-					GameObject.Instantiate(flagAttackerPrefab, new Vector3(this.startingArea.x, 0, this.startingArea.y), Quaternion.identity);
+					this.flagAttacker.transform.position = new Vector3(this.startingArea.x, 0, this.startingArea.y);
+					this.flagAttacker.SetActive(true);
 
 					this.SpawnDefendersUnits(Vector2Int.zero, Team.DEFENDER);
 					this.SpawnDefendersUnits(this.startingArea, Team.ATTACKER);
@@ -124,6 +137,17 @@ public class GameManager : MonoBehaviour
 
 	private void Update()
 	{
+		if(this.IsGameStarted && Input.GetKeyUp(KeyCode.O))
+		{
+			foreach(Unit unit in this.allUnits)
+			{
+				BasicUnit basicUnit = unit as BasicUnit;
+				if(basicUnit != null && !basicUnit.IsDead && basicUnit.Team != PlayerTeam)
+				{
+					basicUnit.Hit(DamageType.DIRECT, int.MaxValue);
+				}
+			}
+		}
 		if(this.isChoosingStartingArea && Input.GetKeyUp(KeyCode.Mouse0))
 		{
 			Vector2Int startingPoint = Vector2Int.FloorToInt(this.GetPosFromScreenPoint(Input.mousePosition));
@@ -132,7 +156,9 @@ public class GameManager : MonoBehaviour
 			{
 				this.isChoosingStartingArea = false;
 				this.startingArea = startingPoint;
-				GameObject.Instantiate(flagAttackerPrefab, new Vector3(this.startingArea.x, 0, this.startingArea.y), Quaternion.identity);
+
+				this.flagAttacker.transform.position = new Vector3(this.startingArea.x, 0, this.startingArea.y);
+				this.flagAttacker.SetActive(true);
 
 				this.lineRenderer.gameObject.SetActive(false);
 
@@ -143,10 +169,14 @@ public class GameManager : MonoBehaviour
 			}
 		}
 
-		if(this.flagTaken)
+		if(this.flagTaken && this.IsGameStarted)
 		{
 			if (Utils.SqrDistance(this.king.Position, this.startingArea) < 1.0f)
+			{
+				this.flagTaken = false;
+				this.king = null;
 				this.GameOver(true);
+			}
 		}
 	}
 
@@ -342,7 +372,9 @@ public class GameManager : MonoBehaviour
 
 	public void OnUnitDead(BasicUnit basicUnit)
 	{
-		if(this.flagTaken && this.king.gameObject == basicUnit.gameObject)
+		if (!this.IsGameStarted)
+			return;
+		if (this.flagTaken && this.king.gameObject == basicUnit.gameObject)
 		{
 			this.GameOver(this.PlayerTeam == Team.DEFENDER);
 
@@ -350,13 +382,11 @@ public class GameManager : MonoBehaviour
 		switch (basicUnit.Team)
 		{
 			case Team.ATTACKER:
-				Debug.Log("Attacker ded");
 				this.remainingAttackerUnits--;
 				if (this.remainingAttackerUnits == 0 && this.PlayerTeam == Team.ATTACKER)
 					this.GameOver(false);
 				break;
 			case Team.DEFENDER:
-				Debug.Log("Defender ded");
 				this.remainingDefenserUnits--;
 				if (this.remainingDefenserUnits == 0 && this.PlayerTeam == Team.DEFENDER)
 					this.GameOver(false);
@@ -375,8 +405,21 @@ public class GameManager : MonoBehaviour
 		this.flag.transform.SetParent(unit.transform.GetChild(0));
 		this.flag.transform.localPosition = new Vector3(0.67f, 0.67f, 0);
 		this.flag.transform.localRotation = Quaternion.Euler(-180, 90, -90);
-
 		this.king = unit;
+
+		if (this.PlayerTeam == Team.ATTACKER)
+		{
+			foreach (Unit u in this.allUnits)
+			{
+				BasicUnit basicUnit = u as BasicUnit;
+				if (basicUnit != null && !basicUnit.IsDead && basicUnit.Team == Team.DEFENDER)
+				{
+					AttackMoveAction action = new AttackMoveAction(basicUnit);
+					action.EnqueueAttack(this.king);
+					basicUnit.EnqueueAction(action, true);
+				}
+			}
+		}
 
 	}
 }

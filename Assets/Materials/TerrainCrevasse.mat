@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TerrainCrevasse
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 642183a5525455a4bb636076bf520140, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _INVERSEMATRIX_APPROXIMATE
@@ -70,7 +70,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
-    - _Shininess: 32
+    - _Shininess: 1
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -90,13 +90,13 @@ Material:
     - _Smoothness: 0.1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SpecularStrength: 0.35
+    - _SpecularStrength: 2.11
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Ambient: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 0.20000002, g: 0.20000002, b: 0, a: 1}
+    - _Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
     - _Emission: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _TestColor: {r: 0.40784317, g: 0.3803922, b: 0.36078432, a: 1}

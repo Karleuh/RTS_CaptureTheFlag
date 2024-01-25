@@ -7,11 +7,11 @@ public class RangeUnit : BasicUnit
 {
 	[Header("Animation")]
 	[SerializeField]
-	string attackAnimation;
+	protected string attackAnimation;
 	[SerializeField]
 	float delayToAttack;
 	[SerializeField]
-	Projectile projectile;
+	protected Projectile projectile;
 
 	[SerializeField]
 	float maxArrowAngle = 60;

@@ -133,6 +133,7 @@ public class Menu : MonoBehaviour
 		this.Shown = false;
 		GameManager.Instance.PlayerTeam = (this.teamDropdown.value == 0 ? Team.ATTACKER : Team.DEFENDER);
 		Terrain.instance.TerrainToGenerate = this.mapDropdown.value;
+		Terrain.instance.Generate();
 		GameManager.Instance.ChooseStartingArea();
 	}
 
@@ -180,6 +181,6 @@ public class Menu : MonoBehaviour
 	public void OnWin(bool win)
 	{
 		this.popupWin.SetActive(true);
-		this.winText.text = win ? "Bravo\nVous avez gagné !" : "Oh non !\nVous avez perdu !";
+		this.winText.text = win ? "Bravo\nVous avez gagné !\nTemps : " + Mathf.FloorToInt(GameManager.Instance.GameTime) + "s" : "Vous avez perdu !Temps : " + Mathf.FloorToInt(GameManager.Instance.GameTime) + "s, unités restantes : " + GameManager.Instance.RemainingPlayerUnit;
 	}
 }
